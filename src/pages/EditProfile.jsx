@@ -1,7 +1,7 @@
 import React from 'react';
 import { Camera, User, Calendar, Clock, Building2, Map, Globe, ChevronDown } from 'lucide-react';
 
-export default function Editprofile() {
+export default function EditProfile() {
   return (
     <div className="min-h-screen bg-[#fd8754] flex items-center justify-center p-4 antialiased font-sans">
       {/* Outer Mobile-like Container */}
