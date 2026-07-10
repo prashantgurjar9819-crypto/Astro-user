@@ -1,34 +1,72 @@
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/pagination";
 
 import watch from "../assets/watch.jpeg";
 
-function banner() {
+const banners = [
+  {
+    image: watch,
+    title: "IT'S ASTRO TIME",
+    subtitle: "✨ Astro App Online | 5 AM – 12 AM",
+    button: "GET YOUR DAILY HOROSCOPE",
+  },
+  {
+    image: watch,
+    title: "DAILY HOROSCOPE",
+    subtitle: "🔮 Get Your Daily Prediction",
+    button: "CHECK NOW",
+  },
+  {
+    image: watch,
+    title: "TALK TO ASTROLOGER",
+    subtitle: "⭐ Chat With Expert Astrologers",
+    button: "BOOK NOW",
+  },
+];
+
+function Banner() {
   return (
-    <div className="mx-4 mt-4 bg-[#f6d6cf] rounded-[28px] overflow-hidden shadow">
+    <div className="mx-4 mt-4 rounded-[28px] overflow-hidden">
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
+        pagination={{ clickable: true }}
+        loop={true}
+      >
+        {banners.map((item, index) => (
+          <SwiperSlide key={index}>
+            <div className="bg-[#f6d6cf] rounded-[28px] overflow-hidden shadow">
+              <div className="pt-5 px-5 text-center">
+                <h1 className="text-[35px] font-black text-orange-600 leading-none whitespace-nowrap">
+                  {item.title}
+                </h1>
 
-      <div className="pt-5 px-5 text-center">
+                <p className="text-orange-600 font-semibold mt-3 text-[17px]">
+                  {item.subtitle}
+                </p>
 
-        <h1 className="text-[35px] font-black text-orange-600 leading-none whitespace-nowrap">
-          IT'S ASTRO TIME
-        </h1>
+                <button className="mt-4 w-full bg-gradient-to-r from-orange-600 to-orange-400 text-white font-bold py-3 rounded-full text-[17px] shadow-lg">
+                  {item.button}
+                </button>
+              </div>
 
-        <p className="text-orange-600 font-semibold mt-3 text-[17px]">
-          ✨ Astro App Online | 5 AM – 12 AM
-        </p>
-
-        <button className="mt-4 w-full bg-gradient-to-r from-orange-600 to-orange-400 text-white font-bold py-3 rounded-full text-[17px] shadow-lg">
-          GET YOUR DAILY HOROSCOPE
-        </button>
-
-      </div>
-
-      <img
-        src={watch}
-        alt="banner"
-        className="w-full h-[170px] object-contain mt-3"
-      />
-
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-[170px] object-contain mt-3"
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 }
 
-export default banner;
+export default Banner;

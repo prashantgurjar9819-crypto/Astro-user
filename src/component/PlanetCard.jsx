@@ -1,35 +1,23 @@
-function PlanetCard({
-  title,
-  description,
-  image,
-  bgColor,
-}) {
+function PlanetCard({ title, description, image, bgColor }) {
   return (
-    <div className={`${bgColor} rounded-3xl p-5 relative overflow-hidden h-52`}>
-
+    <div className={`${bgColor} rounded-3xl p-5 relative overflow-hidden`}>
       <img
         src={image}
         alt={title}
-        className="absolute top-4 left-4 w-14 h-14 rounded-full object-cover"
+        className="absolute top-5 left-5 w-16 h-16 rounded-full object-cover"
       />
 
-      <div className="ml-20">
-        <h2 className="text-2xl font-bold">
-          {title}
-        </h2>
+      <div className="ml-24">
+        <h2 className="text-xl font-bold">{title}</h2>
 
-        <p className="text-gray-700 mt-3">
+        <p className="text-gray-700 mt-2 text-sm">
           {description}
         </p>
 
-        <div className="flex justify-end mt-6">
-          <button className="font-bold text-xl">
-            View &gt;&gt;
-          </button>
-        </div>
-
+        <button className="mt-4 font-bold text-orange-600">
+          View &gt;&gt;
+        </button>
       </div>
-
     </div>
   );
 }
