@@ -1,5 +1,5 @@
 import { ArrowLeft, Search, Mic } from "lucide-react";
- 
+import { useNavigate } from "react-router-dom";
 
 const astrologers = [
   {
@@ -37,18 +37,25 @@ const astrologers = [
 ];
 
 export default function Chat() {
+  const navigate = useNavigate();
+
   return (
     <div className="max-w-md mx-auto min-h-screen bg-[#fafafa]">
 
       {/* Header */}
-
       <div className="flex items-center gap-4 px-4 py-5 bg-white sticky top-0">
-        <ArrowLeft size={24} />
+
+        <ArrowLeft
+          size={24}
+          className="cursor-pointer"
+          onClick={() => navigate("/home")}
+        />
+
         <h1 className="text-3xl font-medium">Chat</h1>
+
       </div>
 
       {/* Search */}
-
       <div className="px-4 py-3">
         <div className="bg-[#FFF2EC] rounded-full flex items-center px-4 py-3">
           <Search className="text-gray-400" size={20} />
@@ -61,7 +68,6 @@ export default function Chat() {
       </div>
 
       {/* Cards */}
-
       <div className="space-y-4 px-4 pb-5">
         {astrologers.map((item, index) => (
           <div key={index} className="bg-white rounded-2xl shadow-md p-4">
@@ -76,13 +82,20 @@ export default function Chat() {
                 <p className="text-sm text-gray-500">{item.skill}</p>
               </div>
             </div>
+
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-lg font-bold text-orange-500">{item.price}</span>
-              <span className="text-sm text-gray-500">{item.exp}</span>
+              <span className="text-lg font-bold text-orange-500">
+                {item.price}
+              </span>
+              <span className="text-sm text-gray-500">
+                {item.exp}
+              </span>
             </div>
+
           </div>
         ))}
       </div>
+
     </div>
   );
 }

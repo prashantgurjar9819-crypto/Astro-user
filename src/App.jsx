@@ -19,7 +19,7 @@ function App() {
       <Route path="/editprofile" element={<EditProfile />} />
         {/* Chat Screen */}
         <Route path="/chat" element={<Chat />} />
-     
+  
     </Routes>
   );
 }
