@@ -4,7 +4,7 @@ import Login from "./features/login";
 import EditProfile from "./pages/EditProfile";
 import Otp from "./features/Otp";
 import Chat from "./pages/Chat";
-import Call from "./pages/call";
+import Call from "./pages/Call";
 import Profile from "./pages/Profile";
 import AstroHistory from "./pages/AstroHistory";
 import LiveAstro from "./pages/LiveAstro";
