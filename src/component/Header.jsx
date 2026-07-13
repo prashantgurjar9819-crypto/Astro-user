@@ -1,6 +1,9 @@
 import { FaBell, FaEnvelope } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function Header() {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[#f8c9c1] rounded-b-[28px] px-5 pt-5 pb-5">
       <div className="flex items-center justify-between">
@@ -24,13 +27,20 @@ function Header() {
         </div>
 
         <div className="flex gap-2">
-          <div className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center">
+
+          {/* Notification Icon */}
+          <div
+            onClick={() => navigate("/notifications")}
+            className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-orange-100"
+          >
             <FaBell size={18} />
           </div>
 
-          <div className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center">
+          {/* Message Icon */}
+          <div className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer">
             <FaEnvelope size={18} />
           </div>
+
         </div>
 
       </div>
