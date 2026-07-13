@@ -43,15 +43,15 @@ function Banner() {
           <SwiperSlide key={index}>
             <div className="bg-[#f6d6cf] rounded-[28px] overflow-hidden shadow">
               <div className="pt-5 px-5 text-center">
-                <h1 className="text-[35px] font-black text-orange-600 leading-none whitespace-nowrap">
+                <h1 className="text-[35px] font-black bg-[#ff8253] leading-none whitespace-nowrap">
                   {item.title}
                 </h1>
 
-                <p className="text-orange-600 font-semibold mt-3 text-[17px]">
+                <p className="text-[#ff8253] font-semibold mt-3 text-[17px]">
                   {item.subtitle}
                 </p>
 
-                <button className="mt-4 w-full bg-gradient-to-r from-orange-600 to-orange-400 text-white font-bold py-3 rounded-full text-[17px] shadow-lg">
+                <button className="mt-4 w-full bg-gradient-to-r from-[#ff8253] to-[#ff8253] text-white font-bold py-3 rounded-full text-[17px] shadow-lg">
                   {item.button}
                 </button>
               </div>
