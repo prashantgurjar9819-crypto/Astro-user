@@ -10,7 +10,7 @@ import { MdLiveTv } from "react-icons/md";
 function Time() {
   const navClass = ({ isActive }) =>
     `flex flex-col items-center transition-colors ${
-      isActive ? "text-orange-500" : "text-gray-400"
+      isActive ? "text-orange-500 font-semibold" : "text-gray-400"
     }`;
 
   return (
@@ -19,34 +19,34 @@ function Time() {
 
         {/* Home */}
         <NavLink to="/home" className={navClass}>
-          <FiHome className="text-2xl" />
-          <span className="text-[10px] mt-1">Home</span>
+          <FiHome className="text-xl sm:text-2xl" />
+          <span className="text-[10px] sm:text-xs mt-1">Home</span>
         </NavLink>
 
         {/* Chat */}
         <NavLink to="/chat" className={navClass}>
-          <FiMessageCircle className="text-2xl" />
-          <span className="text-[10px] mt-1">Chat</span>
+          <FiMessageCircle className="text-xl sm:text-2xl" />
+          <span className="text-[10px] sm:text-xs mt-1">Chat</span>
         </NavLink>
 
         {/* Live Astro */}
         <NavLink to="/liveastro" className={navClass}>
-          <MdLiveTv className="text-2xl" />
-          <span className="text-[10px] mt-1 font-semibold">
+          <MdLiveTv className="text-xl sm:text-2xl" />
+          <span className="text-[10px] sm:text-xs mt-1 font-semibold">
             LIVE ASTRO
           </span>
         </NavLink>
 
         {/* Call */}
         <NavLink to="/call" className={navClass}>
-          <FiPhone className="text-2xl" />
-          <span className="text-[10px] mt-1">Call</span>
+          <FiPhone className="text-xl sm:text-2xl" />
+          <span className="text-[10px] sm:text-xs mt-1">Call</span>
         </NavLink>
 
         {/* Profile */}
         <NavLink to="/profile" className={navClass}>
-          <FiUser className="text-2xl" />
-          <span className="text-[10px] mt-1">Profile</span>
+          <FiUser className="text-xl sm:text-2xl" />
+          <span className="text-[10px] sm:text-xs mt-1">Profile</span>
         </NavLink>
 
       </div>

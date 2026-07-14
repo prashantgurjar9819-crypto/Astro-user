@@ -29,8 +29,6 @@ const liveData = [
 ];
 
 export default function LiveAstro() {
-
-
   const navigate = useNavigate();
 
   return (

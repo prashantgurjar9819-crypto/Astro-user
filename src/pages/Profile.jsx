@@ -6,7 +6,6 @@ import {
   FiChevronRight,
   FiArrowLeft,
 } from "react-icons/fi";
-
 import { useNavigate } from "react-router-dom";
 import Time from "../component/Time";
 
@@ -60,15 +59,26 @@ function Profile() {
 
         </div>
 
-
         {/* Menu */}
         <div className="px-4 py-5 space-y-4">
 
-          <MenuItem icon={<FiClock />} title="Booking History" />
+          <MenuItem
+            icon={<FiClock />}
+            title="Booking History"
+            onClick={() => navigate("/booking-history")}
+          />
 
-          <MenuItem icon={<FiBell />} title="Notifications" />
+          <MenuItem
+            icon={<FiBell />}
+            title="Notifications"
+            onClick={() => navigate("/notifications")}
+          />
 
-          <MenuItem icon={<FiHelpCircle />} title="Help & Support" />
+          <MenuItem
+            icon={<FiHelpCircle />}
+            title="Help & Support"
+            onClick={() => navigate("/help-support")}
+          />
 
           <MenuItem
             icon={<FiLogOut />}
@@ -85,10 +95,12 @@ function Profile() {
   );
 }
 
-
-function MenuItem({ icon, title, danger }) {
+function MenuItem({ icon, title, danger, onClick }) {
   return (
-    <div className="bg-white rounded-2xl shadow p-4 flex justify-between items-center">
+    <div
+      onClick={onClick}
+      className="bg-white rounded-2xl shadow p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition"
+    >
       <div
         className={`flex items-center gap-4 ${
           danger ? "text-red-500" : ""
