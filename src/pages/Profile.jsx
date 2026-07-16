@@ -56,9 +56,12 @@ function Profile() {
               <div className="w-0 h-full bg-white rounded-full"></div>
             </div>
 
-            <button className="mt-6 bg-white text-orange-500 px-8 py-3 rounded-full font-semibold shadow-md">
-              Complete Profile
-            </button>
+           <button
+  onClick={() => navigate("/editprofile")}
+  className="mt-6 bg-white text-orange-500 px-8 py-3 rounded-full font-semibold shadow-md hover:bg-gray-100 transition"
+>
+  Complete Profile
+</button>
 
           </div>
 
