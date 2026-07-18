@@ -1,10 +1,13 @@
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import logo from "../assets/logo.png";
+import { useAuth } from "../context/AuthContext";
 
 function Otp() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { loginUser } = useAuth();
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
@@ -48,8 +51,9 @@ function Otp() {
     }
 
     // API call yaha hogi
+    loginUser();
 
-    navigate("/edit-profile");
+    navigate("/editprofile?mode=onboarding");
   };
 
   const handleResend = () => {
@@ -112,7 +116,7 @@ function Otp() {
 
         {/* Verify Button */}
         <button
-          onClick={() => navigate("/home")}
+          onClick={handleVerify}
           className="w-full mt-10 bg-[#ff7448] text-white py-4 rounded-xl text-lg font-semibold hover:bg-[#ff6230] transition"
         >
           Verify OTP

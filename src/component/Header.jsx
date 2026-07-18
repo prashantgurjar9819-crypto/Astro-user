@@ -1,8 +1,10 @@
 import { FaBell, FaEnvelope } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Header() {
   const navigate = useNavigate();
+  const { isLoggedIn, userName } = useAuth();
 
   return (
     <div className="bg-[#f8c9c1] rounded-b-[28px] px-5 pt-5 pb-5">
@@ -10,18 +12,22 @@ function Header() {
 
         <div className="flex items-center gap-3">
           <img
-            src="https://randomuser.me/api/portraits/women/65.jpg"
+            src={
+              isLoggedIn
+                ? "https://randomuser.me/api/portraits/women/65.jpg"
+                : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            }
             alt="profile"
-            className="w-14 h-14 rounded-full object-cover border-2 border-white"
+            className="w-14 h-14 rounded-full object-cover border-2 border-white bg-white"
           />
 
           <div>
             <h2 className="text-[18px] font-bold text-[#222] leading-none">
-              Ravi Sharma
+              {isLoggedIn ? userName : "Guest User"}
             </h2>
 
             <p className="text-gray-700 text-[13px] mt-1">
-              Welcome!
+              {isLoggedIn ? "Welcome back!" : "Explore Astrology Services"}
             </p>
           </div>
         </div>

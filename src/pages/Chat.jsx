@@ -1,6 +1,7 @@
 import { ArrowLeft, Search, Mic } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
+import { useAuth } from "../context/AuthContext";
 
 const astrologers = [
   {
@@ -39,6 +40,7 @@ const astrologers = [
 
 export default function Chat() {
   const navigate = useNavigate();
+  const { isLoggedIn, triggerLoginModal } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -75,7 +77,12 @@ export default function Chat() {
             {astrologers.map((item, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl shadow-md p-4"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    triggerLoginModal("Chat", "/chat");
+                  }
+                }}
+                className="bg-white rounded-2xl shadow-md p-4 cursor-pointer active:scale-[0.99] transition-transform"
               >
                 <div className="flex items-center gap-3">
                   <img

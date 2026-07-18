@@ -1,9 +1,11 @@
 import { FiArrowLeft, FiMessageCircle, FiPhone, FiTag } from "react-icons/fi";
 import { IoNotifications } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Notifications() {
   const navigate = useNavigate();
+  const { isLoggedIn, triggerLoginModal } = useAuth();
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen flex justify-center">
@@ -43,13 +45,22 @@ function Notifications() {
             color="bg-orange-100"
           />
 
-          <NotificationCard
-            icon={<FiTag />}
-            title="Special Offer 🎉"
-            desc="Get 20% extra talktime on recharge."
-            time="Yesterday"
-            color="bg-purple-100"
-          />
+          <div
+            onClick={() => {
+              if (!isLoggedIn) {
+                triggerLoginModal("Recharge Wallet", "/notifications");
+              }
+            }}
+            className="cursor-pointer"
+          >
+            <NotificationCard
+              icon={<FiTag />}
+              title="Special Offer 🎉"
+              desc="Get 20% extra talktime on recharge."
+              time="Yesterday"
+              color="bg-purple-100"
+            />
+          </div>
 
         </div>
 

@@ -8,9 +8,11 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
+import { useAuth } from "../context/AuthContext";
 
 function Profile() {
   const navigate = useNavigate();
+  const { logoutUser, userName } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -37,7 +39,7 @@ function Profile() {
             />
 
             <h1 className="text-2xl font-bold text-white mt-4">
-              Ravi Sharma
+              {userName}
             </h1>
 
             <p className="text-white/80 text-sm">
@@ -90,6 +92,7 @@ function Profile() {
               icon={<FiLogOut />}
               title="Logout"
               danger
+              onClick={logoutUser}
             />
 
           </div>
