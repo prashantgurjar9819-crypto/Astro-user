@@ -5,6 +5,7 @@ import {
   FiLogOut,
   FiChevronRight,
   FiArrowLeft,
+  FiCreditCard,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
@@ -74,6 +75,12 @@ function Profile() {
               icon={<FiClock />}
               title="Booking History"
               onClick={() => navigate("/booking-history")}
+            />
+
+            <MenuItem
+              icon={<FiCreditCard />}
+              title="My Wallet"
+              onClick={() => navigate("/wallet")}
             />
 
             <MenuItem

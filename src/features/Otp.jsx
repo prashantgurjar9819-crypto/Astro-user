@@ -53,7 +53,7 @@ function Otp() {
     // API call yaha hogi
     loginUser();
 
-    navigate("/editprofile?mode=onboarding");
+    navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
   };
 
   const handleResend = () => {

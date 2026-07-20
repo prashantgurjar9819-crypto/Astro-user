@@ -1,4 +1,4 @@
-import { FaBell, FaEnvelope } from "react-icons/fa";
+import { FaBell, FaWallet } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -42,9 +42,12 @@ function Header() {
             <FaBell size={18} />
           </div>
 
-          {/* Message Icon */}
-          <div className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer">
-            <FaEnvelope size={18} />
+          {/* Wallet Icon */}
+          <div
+            onClick={() => navigate("/wallet")}
+            className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors"
+          >
+            <FaWallet size={18} className="text-gray-700" />
           </div>
 
         </div>

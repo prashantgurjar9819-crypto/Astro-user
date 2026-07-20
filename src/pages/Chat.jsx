@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, Mic } from "lucide-react";
+import { ArrowLeft, Search, Mic, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
 import { useAuth } from "../context/AuthContext";
@@ -79,26 +79,45 @@ export default function Chat() {
                 key={index}
                 onClick={() => {
                   if (!isLoggedIn) {
-                    triggerLoginModal("Chat", "/chat");
+                    triggerLoginModal("Chat", `/chat-session/${item.name}`);
+                  } else {
+                    navigate(`/chat-session/${item.name}`, { state: { astrologer: item } });
                   }
                 }}
                 className="bg-white rounded-2xl shadow-md p-4 cursor-pointer active:scale-[0.99] transition-transform"
               >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
 
-                  <div>
-                    <h2 className="font-bold text-[#1d2340]">
-                      {item.name}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {item.skill}
-                    </p>
+                    <div>
+                      <h2 className="font-bold text-[#1d2340] text-lg">
+                        {item.name}
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        {item.skill}
+                      </p>
+                    </div>
                   </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isLoggedIn) {
+                        triggerLoginModal("Chat", `/chat-session/${item.name}`);
+                      } else {
+                        navigate(`/chat-session/${item.name}`, { state: { astrologer: item } });
+                      }
+                    }}
+                    className="bg-[#FFF2EC] text-[#FF6F3D] text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-1.5 hover:bg-[#FFE5D8] transition-colors cursor-pointer border border-[#FFF2EC]"
+                  >
+                    <MessageCircle size={14} className="fill-[#FF6F3D] text-[#FF6F3D]" />
+                    Chat
+                  </button>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">

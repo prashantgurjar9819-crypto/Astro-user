@@ -16,6 +16,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
 import { useAuth } from "../context/AuthContext";
+import logo from "../assets/logo.png";
 
 const SunEmblem = () => (
   <svg
@@ -167,7 +168,7 @@ export default function EditProfile() {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       updateUserName(fullName);
       alert("Profile completed successfully!");
-      navigate("/home");
+      navigate(location.state?.from || "/home");
     }
   };
 
@@ -208,9 +209,13 @@ export default function EditProfile() {
           {/* Form Card (Overlap) */}
           <div className="bg-white rounded-t-[40px] px-6 pb-28 -mt-8 flex-1 relative flex flex-col">
             {/* Protruding Emblem */}
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-gradient-to-br from-orange-400 to-[#ff7448] rounded-full border-[6px] border-white shadow-lg flex items-center justify-center z-10">
-              <SunEmblem />
-            </div>
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-white rounded-full border-[6px] border-white shadow-lg flex items-center justify-center z-10">
+            <img
+              src={logo}
+              alt="Logo"
+              className="w-18 h-18 object-contain"
+            />
+          </div>
 
             {/* Heading */}
             <div className="text-center mt-16">
