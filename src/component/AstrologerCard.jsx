@@ -1,6 +1,9 @@
 import { CheckCircle, Star, Phone, Video } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 function AstrologerCard() {
+  const { isLoggedIn, triggerLoginModal } = useAuth();
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4 flex items-start justify-between gap-3 w-full">
 
@@ -73,12 +76,26 @@ function AstrologerCard() {
       {/* Buttons */}
       <div className="flex flex-col gap-2 flex-shrink-0">
 
-        <button className="w-24 h-10 rounded-full border border-green-500 text-green-600 text-xs font-medium flex items-center justify-center gap-1 hover:bg-green-50">
+        <button
+          onClick={() => {
+            if (!isLoggedIn) {
+              triggerLoginModal("Call", "/call");
+            }
+          }}
+          className="w-24 h-10 rounded-full border border-green-500 text-green-600 text-xs font-medium flex items-center justify-center gap-1 hover:bg-green-50 cursor-pointer"
+        >
           <Phone size={14} />
           Audio
         </button>
 
-        <button className="w-24 h-10 rounded-full border border-green-500 text-green-600 text-xs font-medium flex items-center justify-center gap-1 hover:bg-green-50">
+        <button
+          onClick={() => {
+            if (!isLoggedIn) {
+              triggerLoginModal("Video Call", "/call");
+            }
+          }}
+          className="w-24 h-10 rounded-full border border-green-500 text-green-600 text-xs font-medium flex items-center justify-center gap-1 hover:bg-green-50 cursor-pointer"
+        >
           <Video size={14} />
           Video
         </button>

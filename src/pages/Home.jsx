@@ -76,6 +76,7 @@ function Home() {
     <div className="min-h-screen bg-[#F6E9E3] flex justify-center">
       <div className="w-full max-w-[430px] bg-[#FDE8E4] min-h-screen relative shadow-xl">
 
+        {/* Scrollable Content */}
         <div className="pb-28 overflow-y-auto">
 
           <Header />
@@ -106,6 +107,7 @@ function Home() {
 
         </div>
 
+        {/* Bottom Navigation */}
         <Bottomnav />
 
       </div>

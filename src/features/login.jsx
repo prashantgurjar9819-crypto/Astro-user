@@ -1,6 +1,6 @@
-import { Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Phone } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 import { auth } from "../firebase";
@@ -11,6 +11,24 @@ import {
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [mobile, setMobile] = useState("");
+
+  const handleMobileChange = (e) => {
+    const val = e.target.value;
+    // Only allow numbers and limit to 10 digits
+    if (/^\d*$/.test(val) && val.length <= 10) {
+      setMobile(val);
+    }
+  };
+
+  const handleContinue = () => {
+    if (mobile.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    navigate("/otp", { state: { from: location.state?.from } });
+  };
 
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,7 +80,7 @@ function Login() {
       localStorage.setItem("phone", phone);
 
       alert("OTP Sent Successfully");
-      navigate("/otp");
+      navigate("/otp", { state: { from: location.state?.from } });
     } catch (error) {
       console.error("Firebase Error:", error);
       resetRecaptcha();
@@ -88,7 +106,15 @@ function Login() {
 
   return (
     <div className="h-screen bg-[#ff8253] flex flex-col justify-end overflow-hidden">
-      <div className="bg-white rounded-t-[35px] h-[85vh] w-full px-6 py-8 overflow-y-auto">
+      {/* White Card */}
+      <div className="bg-white rounded-t-[35px] h-[85vh] w-full px-6 py-8 overflow-y-auto relative">
+        {/* Skip Button */}
+        <button
+          onClick={() => navigate("/home")}
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-base font-medium transition-colors"
+        >
+          Skip
+        </button>
 
         {/* Logo */}
         <div className="flex justify-center mt-4">

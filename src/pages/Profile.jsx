@@ -5,90 +5,109 @@ import {
   FiLogOut,
   FiChevronRight,
   FiArrowLeft,
+  FiCreditCard,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import Time from "../component/Time";
+import Bottomnav from "../component/Bottomnav";
+import { useAuth } from "../context/AuthContext";
 
 function Profile() {
   const navigate = useNavigate();
+  const { logoutUser, userName } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="w-full max-w-md min-h-screen bg-gray-100 pb-24">
+      <div className="w-full max-w-[430px] min-h-screen bg-[#FAFAFA] relative shadow-xl">
 
-        {/* Header */}
-        <div className="relative bg-orange-400 rounded-b-[35px] px-5 pt-8 pb-8 text-center">
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto pb-28">
 
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-5 left-5 bg-white/30 p-2 rounded-full text-white"
-          >
-            <FiArrowLeft size={22} />
-          </button>
+          {/* Header */}
+          <div className="relative bg-orange-400 rounded-b-[35px] px-5 pt-8 pb-8 text-center">
 
-          <img
-            src="https://randomuser.me/api/portraits/women/44.jpg"
-            alt="Profile"
-            className="w-24 h-24 rounded-full mx-auto border-4 border-white object-cover"
-          />
+            {/* Back Button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute top-5 left-5 bg-white/30 p-2 rounded-full text-white"
+            >
+              <FiArrowLeft size={22} />
+            </button>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mt-4">
-            Ravi Sharma
-          </h1>
+            <img
+              src="https://randomuser.me/api/portraits/women/44.jpg"
+              alt="Profile"
+              className="w-24 h-24 rounded-full mx-auto border-4 border-white object-cover"
+            />
 
-          <p className="text-white/80 text-sm sm:text-base">
-            ravi@gmail.com
-          </p>
+            <h1 className="text-2xl font-bold text-white mt-4">
+              {userName}
+            </h1>
 
-          {/* Progress Circle */}
-          <div className="w-28 h-28 border-8 border-white/30 rounded-full flex items-center justify-center mx-auto mt-6">
-            <span className="text-white text-3xl font-bold">
-              0%
-            </span>
+            <p className="text-white/80 text-sm">
+              ravi@gmail.com
+            </p>
+
+            {/* Progress Circle */}
+            <div className="w-28 h-28 border-8 border-white/30 rounded-full flex items-center justify-center mx-auto mt-6">
+              <span className="text-white text-3xl font-bold">
+                0%
+              </span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full h-2.5 bg-white/30 rounded-full mt-6">
+              <div className="w-0 h-full bg-white rounded-full"></div>
+            </div>
+
+           <button
+  onClick={() => navigate("/editprofile")}
+  className="mt-6 bg-white text-orange-500 px-8 py-3 rounded-full font-semibold shadow-md hover:bg-gray-100 transition"
+>
+  Complete Profile
+</button>
+
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full h-2.5 bg-white/30 rounded-full mt-6">
-            <div className="w-0 h-full bg-white rounded-full"></div>
-          </div>
+          {/* Menu */}
+          <div className="px-4 py-5 space-y-4">
 
-          <button className="mt-6 bg-white text-orange-500 px-8 py-3 rounded-full font-semibold shadow-md">
-            Complete Profile
-          </button>
+            <MenuItem
+              icon={<FiClock />}
+              title="Booking History"
+              onClick={() => navigate("/booking-history")}
+            />
+
+            <MenuItem
+              icon={<FiCreditCard />}
+              title="My Wallet"
+              onClick={() => navigate("/wallet")}
+            />
+
+            <MenuItem
+              icon={<FiBell />}
+              title="Notifications"
+              onClick={() => navigate("/notifications")}
+            />
+
+            <MenuItem
+              icon={<FiHelpCircle />}
+              title="Help & Support"
+              onClick={() => navigate("/help-support")}
+            />
+
+            <MenuItem
+              icon={<FiLogOut />}
+              title="Logout"
+              danger
+              onClick={logoutUser}
+            />
+
+          </div>
 
         </div>
 
-        {/* Menu */}
-        <div className="px-4 py-5 space-y-4">
-
-          <MenuItem
-            icon={<FiClock />}
-            title="Booking History"
-            onClick={() => navigate("/booking-history")}
-          />
-
-          <MenuItem
-            icon={<FiBell />}
-            title="Notifications"
-            onClick={() => navigate("/notifications")}
-          />
-
-          <MenuItem
-            icon={<FiHelpCircle />}
-            title="Help & Support"
-            onClick={() => navigate("/help-support")}
-          />
-
-          <MenuItem
-            icon={<FiLogOut />}
-            title="Logout"
-            danger
-          />
-
-        </div>
-
-        <Time />
+        {/* Bottom Navigation */}
+        <Bottomnav />
 
       </div>
     </div>

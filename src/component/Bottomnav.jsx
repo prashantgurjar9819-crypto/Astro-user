@@ -83,63 +83,93 @@ function Bottomnav() {
 
 =======
 import { NavLink } from "react-router-dom";
-import { MdLiveTv } from "react-icons/md";
 import {
   FaHome,
   FaComments,
   FaPhoneAlt,
   FaUser,
 } from "react-icons/fa";
+import { MdLiveTv } from "react-icons/md";
+import { useAuth } from "../context/AuthContext";
 
 function Bottomnav() {
-  const navClass = ({ isActive }) =>
-    `flex flex-col items-center ${
-      isActive ? "text-orange-500" : "text-gray-500"
-    }`;
+  const { isLoggedIn, triggerLoginModal } = useAuth();
 
   return (
-    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[320px] h-[60px] bg-white rounded-full shadow-xl px-5 flex justify-between items-center z-[9999]">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-3 pb-2 z-50">
+      <div className="bg-white h-[82px] rounded-full shadow-2xl flex justify-around items-center">
 
-      {/* Home */}
-      <NavLink to="/home" className={navClass}>
-        <FaHome size={25} />
-        <span className="text-[8px] font-semibold mt-[1px]">
-          Home
-        </span>
-      </NavLink>
+        <NavLink
+          to="/home"
+          className={({ isActive }) =>
+            `flex flex-col items-center flex-1 ${
+              isActive ? "text-orange-500" : "text-[#8E90A6]"
+            }`
+          }
+        >
+          <FaHome size={22} />
+          <span className="text-[11px] mt-1">Home</span>
+        </NavLink>
 
-      {/* Chat */}
-      <NavLink to="/chat" className={navClass}>
-        <FaComments size={25} />
-        <span className="text-[8px] mt-[1px]">
-          Chat
-        </span>
-      </NavLink>
+        <NavLink
+          to="/chat"
+          className={({ isActive }) =>
+            `flex flex-col items-center flex-1 ${
+              isActive ? "text-orange-500" : "text-[#8E90A6]"
+            }`
+          }
+        >
+          <FaComments size={22} />
+          <span className="text-[11px] mt-1">Chat</span>
+        </NavLink>
 
-      {/* Live Astro */}
-      <NavLink to="/liveastro" className={navClass}>
-        <MdLiveTv size={25} />
-        <span className="text-[7px] mt-[1px] font-semibold">
-          LIVE ASTRO
-        </span>
-      </NavLink>
+        <NavLink
+          to="/liveastro"
+          className={({ isActive }) =>
+            `flex flex-col items-center flex-1 ${
+              isActive ? "text-orange-500" : "text-[#8E90A6]"
+            }`
+          }
+        >
+          <MdLiveTv size={22} />
+          <span className="text-[10px] mt-1">LIVE ASTRO</span>
+        </NavLink>
 
-      {/* Call */}
-      <NavLink to="/call" className={navClass}>
-        <FaPhoneAlt size={25} />
-        <span className="text-[8px] mt-[1px]">
-          Call
-        </span>
-      </NavLink>
+        <NavLink
+          to="/call"
+          className={({ isActive }) =>
+            `flex flex-col items-center flex-1 ${
+              isActive ? "text-orange-500" : "text-[#8E90A6]"
+            }`
+          }
+        >
+          <FaPhoneAlt size={22} />
+          <span className="text-[11px] mt-1">Call</span>
+        </NavLink>
 
-      {/* Profile */}
-      <NavLink to="/profile" className={navClass}>
-        <FaUser size={25} />
-        <span className="text-[8px] mt-[1px]">
-          Profile
-        </span>
-      </NavLink>
+        {isLoggedIn ? (
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `flex flex-col items-center flex-1 ${
+                isActive ? "text-orange-500" : "text-[#8E90A6]"
+              }`
+            }
+          >
+            <FaUser size={22} />
+            <span className="text-[11px] mt-1">Profile</span>
+          </NavLink>
+        ) : (
+          <button
+            onClick={() => triggerLoginModal("Profile", "/profile")}
+            className="flex flex-col items-center flex-1 text-[#8E90A6] cursor-pointer"
+          >
+            <FaUser size={22} />
+            <span className="text-[11px] mt-1">Profile</span>
+          </button>
+        )}
 
+      </div>
     </div>
   );
 }

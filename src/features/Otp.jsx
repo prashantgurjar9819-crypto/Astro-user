@@ -1,12 +1,15 @@
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import { auth } from "../firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
 
 function Otp() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { loginUser } = useAuth();
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
@@ -90,8 +93,9 @@ function Otp() {
     setLoading(true);
     try {
       await window.confirmationResult.confirm(enteredOtp);
+      loginUser();
       alert("OTP Verified Successfully! Welcome.");
-      navigate("/home");
+      navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
     } catch (error) {
       console.error("Firebase OTP Verification Error:", error);
       alert(`Invalid OTP or Verification Failed: ${error.code || error.message}`);
@@ -204,7 +208,7 @@ function Otp() {
         <button
           onClick={handleVerify}
           disabled={loading}
-          className={`w-full mt-10 bg-[#ff7448] text-white py-4 rounded-xl text-lg font-semibold transition-opacity ${
+          className={`w-full mt-10 bg-[#ff7448] text-[#ffffff] py-4 rounded-xl text-lg font-semibold transition-opacity ${
             loading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#ff6230]"
           }`}
         >

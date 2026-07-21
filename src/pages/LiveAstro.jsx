@@ -10,21 +10,24 @@ const liveData = [
     name: "Astro Raj",
     speciality: "Love & Relationship Expert",
     views: "2.5K",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
+    image:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
   },
   {
     id: 2,
     name: "Astro Neha",
     speciality: "Career & Marriage",
     views: "1.8K",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800",
+    image:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800",
   },
   {
     id: 3,
     name: "Astro Vikram",
     speciality: "Kundli Specialist",
     views: "3.2K",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800",
+    image:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800",
   },
 ];
 
@@ -32,47 +35,43 @@ export default function LiveAstro() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#F5F6FB] flex justify-center">
-      <div className="w-full max-w-md bg-[#F5F6FB] relative min-h-screen pb-24">
+    <div className="min-h-screen bg-gray-100 flex justify-center">
+      <div className="w-full max-w-[430px] min-h-screen bg-[#F5F6FB] relative shadow-xl">
 
-        {/* Header */}
-        <div className="bg-[#F57C38] text-white rounded-b-[30px] px-5 pt-10 pb-6 sticky top-0 z-20">
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto pb-28">
 
-          <div className="flex items-center">
+          {/* Header */}
+          <div className="bg-[#F57C38] text-white rounded-b-[30px] px-5 pt-10 pb-6 sticky top-0 z-20">
 
-            <button
-              onClick={() => navigate(-1)}
-              className="mr-3"
-            >
-              <ArrowLeft size={26} />
-            </button>
+            <div className="flex items-center">
+              <button onClick={() => navigate(-1)} className="mr-3">
+                <ArrowLeft size={26} />
+              </button>
 
-            <h1 className="text-2xl font-bold">
-              Live Astrologers
-            </h1>
+              <h1 className="text-2xl font-bold">
+                Live Astrologers
+              </h1>
+            </div>
+
+            <p className="text-sm mt-2 opacity-90">
+              Join live sessions with expert astrologers
+            </p>
 
           </div>
 
-          <p className="text-sm mt-2 opacity-90">
-            Join live sessions with expert astrologers
-          </p>
+          <LiveStories />
 
-        </div>
+          <div className="px-4 mt-2 space-y-5">
+            {liveData.map((item) => (
+              <LiveCard key={item.id} item={item} />
+            ))}
+          </div>
 
-        {/* Stories */}
-        <LiveStories />
-
-        {/* Live Cards */}
-        <div className="px-4 mt-2 space-y-5">
-          {liveData.map((item) => (
-            <LiveCard key={item.id} item={item} />
-          ))}
         </div>
 
         {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3">
-          <Bottomnav />
-        </div>
+        <Bottomnav />
 
       </div>
     </div>
