@@ -1,15 +1,21 @@
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function CallHeader() {
-  return (
-    <div className="flex items-center gap-5 px-5 pt-12 pb-5">
+  const navigate = useNavigate();
 
-      <ArrowLeft className="w-7 h-7 cursor-pointer" />
+  return (
+    <div className="flex items-center gap-4 px-5 pt-10 pb-5">
+      <button
+        onClick={() => navigate("/home")}
+        className="cursor-pointer"
+      >
+        <ArrowLeft size={30} />
+      </button>
 
       <h1 className="text-4xl font-medium">
         Call
       </h1>
-
     </div>
   );
 }

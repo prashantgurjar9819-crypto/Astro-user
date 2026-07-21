@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom";
 import {
   FiHome,
   FiMessageCircle,
@@ -7,43 +8,46 @@ import {
 import { MdLiveTv } from "react-icons/md";
 
 function Time() {
+  const navClass = ({ isActive }) =>
+    `flex flex-col items-center transition-colors ${
+      isActive ? "text-orange-500 font-semibold" : "text-gray-400"
+    }`;
+
   return (
     <div className="fixed bottom-3 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-50">
       <div className="bg-white rounded-full shadow-2xl py-3 px-5 flex justify-between items-center">
 
         {/* Home */}
-        <div className="flex flex-col items-center text-gray-400 cursor-pointer">
+        <NavLink to="/home" className={navClass}>
           <FiHome className="text-xl sm:text-2xl" />
           <span className="text-[10px] sm:text-xs mt-1">Home</span>
-        </div>
+        </NavLink>
 
         {/* Chat */}
-        <div className="flex flex-col items-center text-gray-400 cursor-pointer">
+        <NavLink to="/chat" className={navClass}>
           <FiMessageCircle className="text-xl sm:text-2xl" />
           <span className="text-[10px] sm:text-xs mt-1">Chat</span>
-        </div>
+        </NavLink>
 
         {/* Live Astro */}
-        <div className="flex flex-col items-center text-gray-400 cursor-pointer">
+        <NavLink to="/liveastro" className={navClass}>
           <MdLiveTv className="text-xl sm:text-2xl" />
           <span className="text-[10px] sm:text-xs mt-1 font-semibold">
             LIVE ASTRO
           </span>
-        </div>
+        </NavLink>
 
         {/* Call */}
-        <div className="flex flex-col items-center text-gray-400 cursor-pointer">
+        <NavLink to="/call" className={navClass}>
           <FiPhone className="text-xl sm:text-2xl" />
           <span className="text-[10px] sm:text-xs mt-1">Call</span>
-        </div>
+        </NavLink>
 
         {/* Profile */}
-        <div className="flex flex-col items-center text-orange-500 cursor-pointer">
+        <NavLink to="/profile" className={navClass}>
           <FiUser className="text-xl sm:text-2xl" />
-          <span className="text-[10px] sm:text-xs mt-1 font-semibold">
-            Profile
-          </span>
-        </div>
+          <span className="text-[10px] sm:text-xs mt-1">Profile</span>
+        </NavLink>
 
       </div>
     </div>

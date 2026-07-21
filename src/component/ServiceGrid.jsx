@@ -14,10 +14,12 @@ const services = [
     path: "/call",
   },
   {
-    title: "Astro Info",
-    sub: "Astrology Readings",
-    img: "https://randomuser.me/api/portraits/men/64.jpg",
-    path: "/astro-info",
+    
+  title: "Astro Info",
+  sub: "Astrology Readings",
+  img: "https://randomuser.me/api/portraits/men/64.jpg",
+  path: "/astro-history",
+
   },
   {
     title: "Pooja",

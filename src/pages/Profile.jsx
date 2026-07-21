@@ -4,6 +4,7 @@ import {
   FiHelpCircle,
   FiLogOut,
   FiChevronRight,
+  FiArrowLeft,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Time from "../component/Time";
@@ -16,7 +17,15 @@ function Profile() {
       <div className="w-full max-w-md min-h-screen bg-gray-100 pb-24">
 
         {/* Header */}
-        <div className="bg-orange-400 rounded-b-[35px] px-5 pt-8 pb-8 text-center">
+        <div className="relative bg-orange-400 rounded-b-[35px] px-5 pt-8 pb-8 text-center">
+
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-5 left-5 bg-white/30 p-2 rounded-full text-white"
+          >
+            <FiArrowLeft size={22} />
+          </button>
 
           <img
             src="https://randomuser.me/api/portraits/women/44.jpg"

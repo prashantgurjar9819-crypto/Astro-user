@@ -1,117 +1,80 @@
-import { FaEye } from "react-icons/fa";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import LiveStories from "../component/LiveStories";
+import LiveCard from "../component/LiveCard";
 import Bottomnav from "../component/Bottomnav";
 
-const astrologers = [
+const liveData = [
   {
-    name: "Rahul",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    id: 1,
+    name: "Astro Raj",
+    speciality: "Love & Relationship Expert",
+    views: "2.5K",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
   },
   {
-    name: "Rahul",
-    image: "https://randomuser.me/api/portraits/men/33.jpg",
+    id: 2,
+    name: "Astro Neha",
+    speciality: "Career & Marriage",
+    views: "1.8K",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800",
   },
   {
-    name: "Rahul",
-    image: "https://randomuser.me/api/portraits/men/34.jpg",
-  },
-  {
-    name: "Rahul",
-    image: "https://randomuser.me/api/portraits/men/35.jpg",
-  },
-];
-
-const cards = [
-  {
-    name: "Pandit Rahul",
-    speciality: "Vedic Astrology",
-    viewers: 245,
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800",
-  },
-  {
-    name: "Pandit Rahul",
-    speciality: "Vedic Astrology",
-    viewers: 245,
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800",
+    id: 3,
+    name: "Astro Vikram",
+    speciality: "Kundli Specialist",
+    views: "3.2K",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800",
   },
 ];
 
-function LiveAstro() {
+export default function LiveAstro() {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="w-full max-w-md bg-white min-h-screen pb-24">
+    <div className="min-h-screen bg-[#F5F6FB] flex justify-center">
+      <div className="w-full max-w-md bg-[#F5F6FB] relative min-h-screen pb-24">
 
         {/* Header */}
-        <div className="bg-orange-500 text-white px-5 py-6">
-          <h1 className="text-3xl font-light">Live Astrologers</h1>
+        <div className="bg-[#F57C38] text-white rounded-b-[30px] px-5 pt-10 pb-6 sticky top-0 z-20">
+
+          <div className="flex items-center">
+
+            <button
+              onClick={() => navigate(-1)}
+              className="mr-3"
+            >
+              <ArrowLeft size={26} />
+            </button>
+
+            <h1 className="text-2xl font-bold">
+              Live Astrologers
+            </h1>
+
+          </div>
+
+          <p className="text-sm mt-2 opacity-90">
+            Join live sessions with expert astrologers
+          </p>
+
         </div>
 
-        {/* Top Live Users */}
-        <div className="flex gap-4 overflow-x-auto p-4">
-          {astrologers.map((item, index) => (
-            <div key={index} className="text-center flex-shrink-0">
-              <div className="relative">
-                <img
-                  src={item.image}
-                  alt=""
-                  className="w-16 h-16 rounded-full border-4 border-orange-500"
-                />
-
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[10px] px-2 rounded-full">
-                  LIVE
-                </span>
-              </div>
-
-              <p className="mt-2">{item.name}</p>
-            </div>
-          ))}
-        </div>
+        {/* Stories */}
+        <LiveStories />
 
         {/* Live Cards */}
-        <div className="px-4 space-y-5">
-          {cards.map((item, index) => (
-            <div
-              key={index}
-              className="relative rounded-3xl overflow-hidden h-64"
-            >
-              <img
-                src={item.image}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-
-              <div className="absolute inset-0 bg-black/30"></div>
-
-              <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded-full flex items-center gap-2">
-                <FaEye />
-                {item.viewers}
-              </div>
-
-              <div className="absolute bottom-5 left-5 flex items-center gap-3">
-                <img
-                  src={item.image}
-                  alt=""
-                  className="w-12 h-12 rounded-full border-2 border-white"
-                />
-
-                <div className="text-white">
-                  <h2 className="font-bold text-2xl">{item.name}</h2>
-                  <p>{item.speciality}</p>
-                </div>
-              </div>
-
-              <button className="absolute bottom-5 right-5 bg-orange-500 text-white px-7 py-3 rounded-full text-xl font-semibold">
-                Join
-              </button>
-            </div>
+        <div className="px-4 mt-2 space-y-5">
+          {liveData.map((item) => (
+            <LiveCard key={item.id} item={item} />
           ))}
         </div>
 
-        <Bottomnav />
+        {/* Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 flex justify-center pb-3">
+          <Bottomnav />
+        </div>
+
       </div>
     </div>
   );
 }
-
-export default LiveAstro;
