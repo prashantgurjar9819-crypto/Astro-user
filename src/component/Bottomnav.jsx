@@ -5,69 +5,77 @@ import {
   FaPhoneAlt,
   FaUser,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Bottomnav() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const active = (path) =>
+    location.pathname === path
+      ? "text-orange-500"
+      : "text-gray-400";
 
   return (
-    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[320px] h-[60px] bg-white rounded-full shadow-xl px-5 flex justify-between items-center z-50">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-[430px] px-5">
+      <div className="bg-white rounded-full shadow-xl h-[72px] flex items-center justify-around">
 
-      {/* Home */}
-      <div
-        onClick={() => navigate("/home")}
-        className="flex flex-col items-center text-orange-500 cursor-pointer"
-      >
-        <FaHome size={25} />
-        <span className="text-[8px] font-semibold mt-[1px]">
-          Home
-        </span>
+        {/* Home */}
+        <button
+          onClick={() => navigate("/home")}
+          className={`flex flex-col items-center ${active("/home")}`}
+        >
+          <FaHome size={24} />
+          <span className="text-[12px] mt-1 font-medium">
+            Home
+          </span>
+        </button>
+
+        {/* Chat */}
+        <button
+          onClick={() => navigate("/chat")}
+          className={`flex flex-col items-center ${active("/chat")}`}
+        >
+          <FaComments size={22} />
+          <span className="text-[12px] mt-1 font-medium">
+            Chat
+          </span>
+        </button>
+
+        {/* Live Astro */}
+        <button
+          onClick={() => navigate("/live-astro")}
+          className={`flex flex-col items-center ${active("/live-astro")}`}
+        >
+          <MdLiveTv size={23} />
+          <span className="text-[10px] mt-1 font-semibold">
+            LIVE ASTRO
+          </span>
+        </button>
+
+        {/* Call */}
+        <button
+          onClick={() => navigate("/call")}
+          className={`flex flex-col items-center ${active("/call")}`}
+        >
+          <FaPhoneAlt size={22} />
+          <span className="text-[12px] mt-1 font-medium">
+            Call
+          </span>
+        </button>
+
+        {/* Profile */}
+        <button
+          onClick={() => navigate("/profile")}
+          className={`flex flex-col items-center ${active("/profile")}`}
+        >
+          <FaUser size={22} />
+          <span className="text-[12px] mt-1 font-medium">
+            Profile
+          </span>
+        </button>
+
       </div>
-
-      {/* Chat */}
-      <div
-        onClick={() => navigate("/chat")}
-        className="flex flex-col items-center text-gray-500 cursor-pointer"
-      >
-        <FaComments size={25} />
-        <span className="text-[8px] mt-[1px]">
-          Chat
-        </span>
-      </div>
-
-      {/* LIVE ASTRO */}
-      <div
-        onClick={() => navigate("/live-astro")}
-        className="flex flex-col items-center text-gray-500 cursor-pointer"
-      >
-        <MdLiveTv size={25} />
-        <span className="text-[7px] mt-[1px] font-semibold">
-          LIVE ASTRO
-        </span>
-      </div>
-
-      {/* Call */}
-      <div
-        onClick={() => navigate("/call")}
-        className="flex flex-col items-center text-gray-500 cursor-pointer"
-      >
-        <FaPhoneAlt size={25} />
-        <span className="text-[8px] mt-[1px]">
-          Call
-        </span>
-      </div>
-
-      {/* Profile */}
-      <div
-        onClick={() => navigate("/profile")}
-        className="flex flex-col items-center text-orange-500 cursor-pointer"
-      >
-        <FaUser size={25} />
-        <span className="text-[8px] font-semibold mt-[1px]">
-          Profile
-        </span>
-      </div>
-
     </div>
   );
 }
