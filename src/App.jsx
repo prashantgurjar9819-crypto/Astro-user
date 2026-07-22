@@ -15,6 +15,7 @@ import Notifications from "./pages/Notifications";
 import HelpSupport from "./pages/HelpSupport";
 import LiveAstro from "./pages/LiveAstro";
 import ChatSession from "./pages/ChatSession";
+import CallSession from "./pages/CallSession";
 import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
 
@@ -103,6 +104,7 @@ function AppContent() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/chat-session/:name" element={<ChatSession />} />
         <Route path="/call" element={<Call />} />
+        <Route path="/call-session/:name" element={<CallSession />} />
         <Route path="/liveastro" element={<LiveAstro />} />
         <Route path="/live-astro" element={<LiveAstro />} />
         <Route path="/notifications" element={<Notifications />} />

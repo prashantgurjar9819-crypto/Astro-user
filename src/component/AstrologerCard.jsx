@@ -126,7 +126,7 @@ function AstrologerCard({ item }) {
             if (!isLoggedIn) {
               triggerLoginModal("Audio Call", "/call");
             } else {
-              alert(`Initiating Audio Call with ${data.name}...`);
+              navigate(`/call-session/${data.name}?type=audio`, { state: { astrologer: data } });
             }
           }}
           className="w-[96px] py-2.5 rounded-full bg-[#EBF7EE] text-[#2EA248] hover:bg-[#d8eedc] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
@@ -140,7 +140,7 @@ function AstrologerCard({ item }) {
             if (!isLoggedIn) {
               triggerLoginModal("Video Call", "/call");
             } else {
-              alert(`Initiating Video Call with ${data.name}...`);
+              navigate(`/call-session/${data.name}?type=video`, { state: { astrologer: data } });
             }
           }}
           className="w-[96px] py-2.5 rounded-full bg-[#FFF2EC] text-[#FF6F3D] hover:bg-[#ffe5d9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
