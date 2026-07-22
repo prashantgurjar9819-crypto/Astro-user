@@ -50,6 +50,10 @@ export default function ChatSession() {
   };
 
   const handleConfirmDob = () => {
+    if (!isLoggedIn) {
+      triggerLoginModal("Chat Session", `/chat-session/${astrologer.name}`);
+      return;
+    }
     setShowDobModal(false);
     
     const formattedDob = formatDobToLong(tempDob);
