@@ -33,7 +33,7 @@ function Login() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const resetRecaptcha = () => {
+  const getRecaptchaVerifier = () => {
     if (window.recaptchaVerifier) {
       try {
         window.recaptchaVerifier.clear();
@@ -46,6 +46,19 @@ function Login() {
     if (container) {
       container.innerHTML = "";
     }
+
+    const appVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: (response) => {
+          console.log("reCAPTCHA resolved automatically");
+        },
+      }
+    );
+    window.recaptchaVerifier = appVerifier;
+    return appVerifier;
   };
 
   const sendOTP = async () => {
@@ -57,23 +70,13 @@ function Login() {
     setLoading(true);
 
     try {
-      resetRecaptcha();
-
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "normal",
-          callback: (response) => {
-            console.log("reCAPTCHA resolved");
-          },
-        }
-      );
+      const appVerifier = getRecaptchaVerifier();
+      const formattedPhone = "+91" + phone.trim();
 
       const confirmationResult = await signInWithPhoneNumber(
         auth,
-        "+91" + phone,
-        window.recaptchaVerifier
+        formattedPhone,
+        appVerifier
       );
 
       window.confirmationResult = confirmationResult;
@@ -83,7 +86,10 @@ function Login() {
       navigate("/otp", { state: { from: location.state?.from } });
     } catch (error) {
       console.error("Firebase Error:", error);
-      resetRecaptcha();
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch (e) {}
+        window.recaptchaVerifier = null;
+      }
 
       let msg = error.message;
       if (error.code === "auth/invalid-app-credential") {

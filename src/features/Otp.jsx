@@ -127,7 +127,7 @@ function Otp() {
       recaptchaContainer.id = "dynamic-recaptcha-container-otp";
       document.body.appendChild(recaptchaContainer);
 
-      window.recaptchaVerifier = new RecaptchaVerifier(
+      const recaptchaVerifier = new RecaptchaVerifier(
         auth,
         recaptchaContainer,
         {
@@ -135,10 +135,12 @@ function Otp() {
         }
       );
 
+      window.recaptchaVerifier = recaptchaVerifier;
+
       const confirmationResult = await signInWithPhoneNumber(
         auth,
-        "+91" + phone,
-        window.recaptchaVerifier
+        "+91" + phone.trim(),
+        recaptchaVerifier
       );
 
       window.confirmationResult = confirmationResult;
