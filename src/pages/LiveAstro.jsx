@@ -60,13 +60,33 @@ export default function LiveAstro() {
 
           </div>
 
-          <LiveStories />
-
-          <div className="px-4 mt-2 space-y-5">
-            {liveData.map((item) => (
-              <LiveCard key={item.id} item={item} />
-            ))}
-          </div>
+          {/* Set to true to enable Live Astro pages, currently disabled for Coming Soon */}
+          {false ? (
+            <>
+              <LiveStories />
+              <div className="px-4 mt-2 space-y-5">
+                {liveData.map((item) => (
+                  <LiveCard key={item.id} item={item} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center animate-fade-in">
+              <div className="w-24 h-24 bg-orange-50 rounded-full border-4 border-orange-100 flex items-center justify-center shadow-inner mb-6">
+                <span className="text-4xl">🎥</span>
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#421d18] tracking-tight">Live Astro Coming Soon</h2>
+              <p className="text-gray-500 text-sm mt-3 max-w-[280px] leading-relaxed">
+                Our expert astrologers will be live here very soon. You will be able to join live sessions and chat directly!
+              </p>
+              <button 
+                onClick={() => navigate("/home")}
+                className="mt-8 bg-gradient-to-r from-orange-400 to-[#F57C38] text-white px-8 py-3 rounded-full font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all cursor-pointer"
+              >
+                Go Back to Home
+              </button>
+            </div>
+          )}
 
         </div>
 

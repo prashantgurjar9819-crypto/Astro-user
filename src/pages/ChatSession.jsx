@@ -1,7 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, MoreVertical, Send, CheckCheck, Plus } from "lucide-react";
+import { ArrowLeft, MoreVertical, Send, CheckCheck, Plus, Calendar } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
+const CakeIcon = () => (
+  <svg className="w-6 h-6 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8" />
+    <path d="M4 16h16" />
+    <path d="M12 9V5" />
+    <path d="M12 5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+  </svg>
+);
+
+const formatDobToLong = (dobStr) => {
+  if (!dobStr) return "14 Aug 2001";
+  const parts = dobStr.replace(/\s+/g, "").split("/");
+  if (parts.length < 3) return dobStr;
+  const day = parseInt(parts[0], 10);
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const year = parts[2];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  if (isNaN(day) || isNaN(monthIdx) || monthIdx < 0 || monthIdx > 11) return dobStr;
+  return `${day} ${months[monthIdx]} ${year}`;
+};
 
 export default function ChatSession() {
   const navigate = useNavigate();
@@ -16,12 +37,53 @@ export default function ChatSession() {
   };
 
   const [messages, setMessages] = useState([]);
+  const [showDobModal, setShowDobModal] = useState(true);
+  const [tempDob, setTempDob] = useState(() => {
+    return localStorage.getItem("dob") || "14/08/2001";
+  });
 
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleConfirmDob = () => {
+    setShowDobModal(false);
+    
+    const formattedDob = formatDobToLong(tempDob);
+    
+    const now = new Date();
+    const formattedTime = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const newMsg = {
+      id: Date.now(),
+      sender: "user",
+      text: `🎂 My Date of Birth is ${formattedDob}`,
+      time: formattedTime,
+      status: "read",
+    };
+
+    setMessages([newMsg]);
+
+    // Simulate dummy automated response after 1.5 seconds
+    setTimeout(() => {
+      const responseTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const responseMsg = {
+        id: Date.now() + 1,
+        sender: "astrologer",
+        text: `Hello! I have received your Date of Birth (${formattedDob}). Let me look into your chart. How can I help you today?`,
+        time: responseTime,
+      };
+      setMessages((prev) => [...prev, responseMsg]);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -261,6 +323,83 @@ export default function ChatSession() {
             </button>
           </div>
         </form>
+
+        {/* DOB Confirmation Modal Overlay */}
+        {showDobModal && (() => {
+          const formattedDob = formatDobToLong(tempDob);
+          return (
+            <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] z-30 flex items-center justify-center p-6">
+              <div className="bg-white rounded-[32px] w-full max-w-[340px] p-6 text-center shadow-2xl animate-fade-in flex flex-col items-center">
+                {/* Emblem header */}
+                <div className="w-20 h-20 bg-orange-50 rounded-full border-4 border-orange-100/50 flex items-center justify-center shadow-inner mt-2">
+                  <Calendar size={36} className="text-[#FF6F3D]" />
+                </div>
+
+                <h3 className="text-xl font-bold text-[#1d2340] mt-5 leading-tight">
+                  Confirm Your<br />Date of Birth
+                </h3>
+
+                <p className="text-gray-500 text-[13px] mt-2.5 px-2 leading-relaxed">
+                  Please confirm your Date of Birth before starting your conversation.
+                </p>
+
+                {/* DOB Display Card */}
+                <div className="w-full bg-[#FFF2EC] border border-[#ffe0d1] rounded-2xl py-3.5 px-4 flex items-center justify-center gap-2 mt-5 relative cursor-pointer hover:bg-[#ffe0d1] transition-colors">
+                  <CakeIcon />
+                  <span className="text-[#1d2340] font-bold text-lg leading-none">
+                    {formattedDob}
+                  </span>
+                  <input
+                    type="date"
+                    max={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (!val) return;
+                      const [year, month, day] = val.split("-");
+                      const newDob = `${day}/${month}/${year}`;
+                      setTempDob(newDob);
+                      localStorage.setItem("dob", newDob);
+                    }}
+                  />
+                </div>
+
+                <p className="text-[11px] text-gray-400 mt-4 leading-normal">
+                  You won't be able to change this<br />during this chat session.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 w-full mt-6 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="flex-1 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl font-bold text-gray-500 text-sm active:scale-95 transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmDob}
+                    className="flex-1 py-3 bg-[#FF6F3D] hover:bg-[#e05e30] rounded-xl font-bold text-white text-sm shadow-md shadow-orange-500/15 active:scale-95 transition-all cursor-pointer"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+          }
+        `}</style>
 
       </div>
     </div>
