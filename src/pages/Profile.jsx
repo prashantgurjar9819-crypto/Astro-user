@@ -40,11 +40,11 @@ function Profile() {
             />
 
             <h1 className="text-2xl font-bold text-white mt-4">
-              {userName}
+              {userName || "Astro User"}
             </h1>
 
             <p className="text-white/80 text-sm">
-              ravi@gmail.com
+              {userName ? `${userName.toLowerCase().replace(/\s+/g, "")}@gmail.com` : "user@gmail.com"}
             </p>
 
             {/* Progress Circle */}

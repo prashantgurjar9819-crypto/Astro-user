@@ -23,7 +23,7 @@ function Header() {
 
           <div>
             <h2 className="text-[18px] font-bold text-[#222] leading-none">
-              {isLoggedIn ? userName : "Guest User"}
+              {isLoggedIn ? (userName || "Astro User") : "Guest User"}
             </h2>
 
             <p className="text-gray-700 text-[13px] mt-1">
@@ -43,12 +43,14 @@ function Header() {
           </div>
 
           {/* Wallet Icon */}
-          <div
-            onClick={() => navigate("/wallet")}
-            className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors"
-          >
-            <FaWallet size={18} className="text-gray-700" />
-          </div>
+          {isLoggedIn && (
+            <div
+              onClick={() => navigate("/wallet")}
+              className="w-9 h-9 bg-white rounded-full shadow flex items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors"
+            >
+              <FaWallet size={18} className="text-gray-700" />
+            </div>
+          )}
 
         </div>
 

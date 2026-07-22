@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import HistoryCard from "../component/HistoryCard";
 
@@ -42,27 +42,29 @@ export default function AstroHistory() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#F5F6FB] flex justify-center">
+    <div className="min-h-screen bg-[#F7F7F7] flex justify-center">
       <div className="w-full max-w-md">
 
         {/* Header */}
-        <div className="sticky top-0 bg-white h-16 flex items-center justify-center shadow-sm relative">
-
+        <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-b-[35px] shadow-md px-5 pt-12 pb-6 relative">
           <button
             onClick={() => navigate(-1)}
-            className="absolute left-4 p-2 rounded-full hover:bg-gray-100 transition"
+            className="absolute left-5 top-12 text-white text-2xl"
           >
-            <ArrowLeft size={24} />
+            <FiArrowLeft />
           </button>
-
-          <h1 className="text-2xl font-semibold">
-            Astro History
-          </h1>
-
+          
+          <div className="text-center">
+            <h1 className="text-white text-2xl font-bold">
+              Astro History
+            </h1>
+            <p className="text-orange-100 text-sm mt-1">
+              Your past consultations and calls
+            </p>
+          </div>
         </div>
 
         {/* Cards */}
-
         <div className="p-4 space-y-4">
           {history.map((item) => (
             <HistoryCard key={item.id} item={item} />

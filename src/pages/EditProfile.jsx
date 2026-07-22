@@ -38,7 +38,7 @@ const SunEmblem = () => (
 );
 
 const StepIndicator = ({ activeStep }) => {
-  const totalSteps = 9;
+  const totalSteps = 8;
   return (
     <div className="flex items-center justify-between w-full px-2 mt-4 relative">
       {/* Connecting Line */}
@@ -79,9 +79,9 @@ export default function EditProfile() {
   // Onboarding Step State
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: userName.split(" ")[0] || "",
+    firstName: (userName && userName !== "Ravi Sharma") ? (userName.split(" ")[0] || "") : "",
     middleName: "",
-    lastName: userName.split(" ")[1] || "",
+    lastName: (userName && userName !== "Ravi Sharma") ? (userName.split(" ")[1] || "") : "",
     gender: "",
     dob: "",
     tob: "",
@@ -93,7 +93,7 @@ export default function EditProfile() {
   });
 
   // Standard Single-Page State
-  const [singleName, setSingleName] = useState(userName);
+  const [singleName, setSingleName] = useState(userName === "Ravi Sharma" ? "" : userName);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -159,14 +159,9 @@ export default function EditProfile() {
         alert("Please enter country");
         return;
       }
-      setStep(9);
-    } else if (step === 9) {
-      if (!formData.address.trim()) {
-        alert("Please enter address");
-        return;
-      }
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       updateUserName(fullName);
+      localStorage.setItem("dob", formData.dob || "");
       alert("Profile completed successfully!");
       navigate(location.state?.from || "/home");
     }
@@ -182,8 +177,64 @@ export default function EditProfile() {
     navigate("/profile");
   };
 
+  // Parse "HH:MM AM/PM"
+  const parseTob = (tobStr) => {
+    if (!tobStr) return { hour: "", minute: "", ampm: "AM" };
+    const parts = tobStr.split(" ");
+    const timePart = parts[0] || "";
+    const ampmPart = parts[1] || "AM";
+    const [h, m] = timePart.split(":");
+    return {
+      hour: h || "",
+      minute: m || "",
+      ampm: ampmPart || "AM",
+    };
+  };
+
+  const updateTob = (newHour, newMinute, newAmpm) => {
+    let h = newHour.replace(/\D/g, "");
+    if (h.length === 2) {
+      const hrs = parseInt(h, 10);
+      if (hrs > 12) h = "12";
+      if (hrs === 0) h = "12";
+    }
+    
+    let m = newMinute.replace(/\D/g, "");
+    if (m.length === 2) {
+      const mins = parseInt(m, 10);
+      if (mins > 59) m = "59";
+    }
+
+    if (h || m) {
+      handleChange("tob", `${h}:${m} ${newAmpm}`);
+    } else {
+      handleChange("tob", "");
+    }
+  };
+
+  const handleHourBlur = () => {
+    const { hour, minute, ampm } = parseTob(formData.tob);
+    if (!hour) return;
+    let h = hour.replace(/\D/g, "");
+    const hrs = parseInt(h, 10);
+    if (hrs > 12) h = "12";
+    if (hrs === 0) h = "12";
+    const paddedH = String(hrs).padStart(2, "0");
+    handleChange("tob", `${paddedH}:${minute} ${ampm}`);
+  };
+
+  const handleMinuteBlur = () => {
+    const { hour, minute, ampm } = parseTob(formData.tob);
+    if (!minute) return;
+    let m = minute.replace(/\D/g, "");
+    const mins = parseInt(m, 10);
+    if (mins > 59) m = "59";
+    const paddedM = String(mins).padStart(2, "0");
+    handleChange("tob", `${hour}:${paddedM} ${ampm}`);
+  };
+
   // Step progress percentage calculations
-  const progress = Math.round((step / 9) * 100);
+  const progress = Math.round((step / 8) * 100);
 
   if (isOnboarding) {
     // -------------------------------------------------------------
@@ -312,39 +363,141 @@ export default function EditProfile() {
                       <input
                         type="text"
                         value={formData.dob}
-                        onChange={(e) => handleChange("dob", e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const clean = value.replace(/\D/g, "");
+                          let formatted = "";
+                          if (clean.length > 0) {
+                            formatted += clean.substring(0, 2);
+                          }
+                          if (clean.length > 2) {
+                            formatted += " / " + clean.substring(2, 4);
+                          }
+                          if (clean.length > 4) {
+                            let yearVal = clean.substring(4, 8);
+                            if (yearVal.length === 4) {
+                              const currentYear = new Date().getFullYear();
+                              if (parseInt(yearVal, 10) > currentYear) {
+                                yearVal = currentYear.toString();
+                              }
+                            }
+                            formatted += " / " + yearVal;
+                          }
+                          handleChange("dob", formatted);
+                        }}
                         placeholder="DD / MM / YYYY"
-                        className="w-full px-5 py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-base shadow-sm pr-12 cursor-pointer"
+                        maxLength={14}
+                        className="w-full px-5 py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-base shadow-sm pr-12"
                       />
-                      <Calendar size={20} className="text-[#ff7448] absolute right-4 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {step === 4 && (
-                <div className="space-y-6 animate-fade-in w-full flex flex-col items-center">
-                  <div className="w-24 h-24 bg-orange-50 rounded-full border-4 border-orange-100 flex items-center justify-center shadow-inner mb-4">
-                    <Clock size={44} className="text-[#ff7448]" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#421d18] text-center mb-4">What's your time of birth?</h2>
-                  <div className="w-full">
-                    <div className="relative flex items-center">
-                      <input
-                        type="text"
-                        value={formData.tob}
-                        onChange={(e) => handleChange("tob", e.target.value)}
-                        placeholder="10:30 AM"
-                        className="w-full px-5 py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-base shadow-sm pr-16 cursor-pointer"
-                      />
-                      <div className="absolute right-4 flex items-center gap-1 text-[#ff7448] pointer-events-none">
-                        <Clock size={20} />
-                        <ChevronDown size={18} className="text-gray-400" />
+                      <div className="absolute right-4 w-6 h-6 flex items-center justify-center cursor-pointer">
+                        <Calendar size={20} className="text-[#ff7448]" />
+                        <input
+                          type="date"
+                          max={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) return;
+                            const [year, month, day] = val.split("-");
+                            handleChange("dob", `${day} / ${month} / ${year}`);
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               )}
+
+              {step === 4 && (() => {
+                const { hour, minute, ampm } = parseTob(formData.tob);
+                return (
+                  <div className="space-y-6 animate-fade-in w-full flex flex-col items-center">
+                    <div className="w-24 h-24 bg-orange-50 rounded-full border-4 border-orange-100 flex items-center justify-center shadow-inner mb-4">
+                      <Clock size={44} className="text-[#ff7448]" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-[#421d18] text-center mb-4">What's your time of birth?</h2>
+                    
+                    <div className="flex items-center justify-between gap-4 w-full max-w-sm">
+                      {/* Hour Input Box */}
+                      <div className="flex flex-col items-center flex-1">
+                        <input
+                          type="text"
+                          placeholder="HH"
+                          value={hour}
+                          maxLength={2}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            let hrsVal = val;
+                            if (val.length === 2) {
+                              const hrs = parseInt(val, 10);
+                              if (hrs > 12) hrsVal = "12";
+                              if (hrs === 0) hrsVal = "12";
+                            }
+                            updateTob(hrsVal, minute, ampm);
+                          }}
+                          onBlur={handleHourBlur}
+                          className="w-full text-center py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg font-bold shadow-sm"
+                        />
+                        <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Hour</span>
+                      </div>
+
+                      {/* Colon Separator */}
+                      <span className="text-3xl font-extrabold text-gray-300 pb-5">:</span>
+
+                      {/* Minute Input Box */}
+                      <div className="flex flex-col items-center flex-1">
+                        <input
+                          type="text"
+                          placeholder="MM"
+                          value={minute}
+                          maxLength={2}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            let minsVal = val;
+                            if (val.length === 2) {
+                              const mins = parseInt(val, 10);
+                              if (mins > 59) minsVal = "59";
+                            }
+                            updateTob(hour, minsVal, ampm);
+                          }}
+                          onBlur={handleMinuteBlur}
+                          className="w-full text-center py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg font-bold shadow-sm"
+                        />
+                        <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Minute</span>
+                      </div>
+
+                      {/* AM / PM Toggle buttons */}
+                      <div className="flex flex-col items-center ml-2">
+                        <div className="flex bg-gray-100 p-1.5 rounded-2xl border border-orange-50/50">
+                          <button
+                            type="button"
+                            onClick={() => updateTob(hour, minute, "AM")}
+                            className={`px-3.5 py-3 rounded-xl font-bold transition-all text-xs cursor-pointer ${
+                              ampm === "AM"
+                                ? "bg-[#ff7448] text-white shadow-md shadow-orange-500/25"
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
+                          >
+                            AM
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateTob(hour, minute, "PM")}
+                            className={`px-3.5 py-3 rounded-xl font-bold transition-all text-xs cursor-pointer ${
+                              ampm === "PM"
+                                ? "bg-[#ff7448] text-white shadow-md shadow-orange-500/25"
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
+                          >
+                            PM
+                          </button>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">Period</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {step === 5 && (
                 <div className="space-y-6 animate-fade-in w-full flex flex-col items-center">
@@ -424,24 +577,6 @@ export default function EditProfile() {
                 </div>
               )}
 
-              {step === 9 && (
-                <div className="space-y-6 animate-fade-in w-full">
-                  <h2 className="text-xl font-bold text-[#421d18] text-center mb-4">Enter your full address</h2>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Full Address *</label>
-                    <div className="relative flex items-start">
-                      <MapPin size={20} className="text-[#ff7448] absolute left-4 top-4" />
-                      <textarea
-                        rows="4"
-                        value={formData.address}
-                        onChange={(e) => handleChange("address", e.target.value)}
-                        placeholder="Enter your full address"
-                        className="w-full pl-12 pr-4 py-4 border border-orange-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-base shadow-sm resize-none"
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Progress Tracker bar */}
@@ -460,13 +595,10 @@ export default function EditProfile() {
               onClick={handleContinue}
               className="w-full mt-6 bg-gradient-to-r from-orange-400 to-[#ff7448] text-white py-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-all cursor-pointer"
             >
-              {step === 9 ? "Complete Profile" : "Continue"}
+              {step === 8 ? "Complete Profile" : "Continue"}
               <ArrowRight size={20} />
             </button>
           </div>
-
-          {/* Bottom Nav */}
-          <Bottomnav />
         </div>
 
         <style>{`

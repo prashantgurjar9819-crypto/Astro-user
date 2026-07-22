@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
   const [pendingRedirect, setPendingRedirect] = useState(null);
   const [justLoggedOut, setJustLoggedOut] = useState(false);
   const [userName, setUserName] = useState(
-    () => localStorage.getItem("userName") || "Ravi Sharma"
+    () => localStorage.getItem("userName") || ""
   );
 
   const loginUser = () => {
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
   const logoutUser = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userName");
-    setUserName("Ravi Sharma");
+    setUserName("");
     setJustLoggedOut(true);
     setIsLoggedIn(false);
     setShowModal(false);
