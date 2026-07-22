@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const services = [
   {
@@ -31,10 +32,11 @@ const services = [
 
 export default function ServiceGrid() {
   const navigate = useNavigate();
+  const { isLoggedIn, triggerLoginModal } = useAuth();
 
-  const handleNavigation = (path) => {
-    if (path) {
-      navigate(path);
+  const handleNavigation = (item) => {
+    if (item.path) {
+      navigate(item.path);
     }
   };
 
@@ -43,7 +45,7 @@ export default function ServiceGrid() {
       {services.map((item, index) => (
         <div
           key={index}
-          onClick={() => handleNavigation(item.path)}
+          onClick={() => handleNavigation(item)}
           className="relative h-[90px] rounded-2xl bg-white shadow-md p-3 cursor-pointer active:scale-95 transition-transform"
         >
           {/* Offer Badge */}

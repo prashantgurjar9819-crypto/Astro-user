@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginRequiredModal() {
-  const { showModal, pendingRedirect, closeLoginModal } = useAuth();
+  const { showModal, pendingFeature, pendingRedirect, closeLoginModal } = useAuth();
   const navigate = useNavigate();
 
   if (!showModal) return null;
@@ -36,7 +36,9 @@ export default function LoginRequiredModal() {
 
         {/* Message */}
         <p className="text-gray-500 text-center text-[15px] px-4 mb-8 leading-relaxed">
-          Please login or sign up to continue.
+          {pendingFeature
+            ? `Please login or sign up to access ${pendingFeature}.`
+            : "Please login or sign up to continue."}
         </p>
 
         {/* Action Buttons */}

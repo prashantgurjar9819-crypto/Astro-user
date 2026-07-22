@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Phone } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
-
-
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logoutUser } = useAuth();
   const [mobile, setMobile] = useState("");
+
+  const handleSkip = () => {
+    logoutUser();
+    navigate("/home");
+  };
 
   const handleMobileChange = (e) => {
     const val = e.target.value;
@@ -32,8 +37,8 @@ function Login() {
       <div className="bg-white rounded-t-[35px] h-[85vh] w-full px-6 py-8 overflow-y-auto relative">
         {/* Skip Button */}
         <button
-          onClick={() => navigate("/home")}
-          className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-base font-medium transition-colors"
+          onClick={handleSkip}
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-base font-medium transition-colors cursor-pointer"
         >
           Skip
         </button>
