@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 function Otp() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginUser } = useAuth();
+  const { loginUser, updateUserName } = useAuth();
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
@@ -93,6 +93,40 @@ function Otp() {
     setLoading(true);
     try {
       await window.confirmationResult.confirm(enteredOtp);
+
+      // Call backend login API
+      const phoneNum = localStorage.getItem("phone");
+      try {
+        const apiResponse = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: phoneNum,
+            mobile: phoneNum
+          }),
+        });
+
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          console.log("Backend Login success:", apiData);
+          if (apiData.token) {
+            localStorage.setItem("authToken", apiData.token);
+          }
+          if (apiData.user) {
+            localStorage.setItem("user", JSON.stringify(apiData.user));
+            if (apiData.user.name) {
+              updateUserName(apiData.user.name);
+            }
+          }
+        } else {
+          console.warn("Backend Login API failed status:", apiResponse.status);
+        }
+      } catch (apiErr) {
+        console.error("Backend Login API error:", apiErr);
+      }
+
       loginUser();
       alert("OTP Verified Successfully! Welcome.");
       navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
