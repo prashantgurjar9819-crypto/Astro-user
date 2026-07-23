@@ -94,6 +94,7 @@ export default function EditProfile() {
 
   // Standard Single-Page State
   const [singleName, setSingleName] = useState(userName === "Ravi Sharma" ? "" : userName);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -107,7 +108,7 @@ export default function EditProfile() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step === 1) {
       if (!formData.firstName.trim()) {
         alert("Please enter first name");
@@ -159,11 +160,70 @@ export default function EditProfile() {
         alert("Please enter country");
         return;
       }
-      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      updateUserName(fullName);
-      localStorage.setItem("dob", formData.dob || "");
-      alert("Profile completed successfully!");
-      navigate(location.state?.from || "/home");
+      
+      setIsUpdating(true);
+      try {
+        const token = localStorage.getItem("authToken");
+        const phoneVal = localStorage.getItem("phone");
+
+        const response = await fetch("https://kalpjoytish-backend.onrender.com/api/user/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          },
+          body: (() => {
+            let formattedDob = "";
+            if (formData.dob) {
+              const parts = formData.dob.split(" / ");
+              if (parts.length === 3) {
+                formattedDob = `${parts[2]}-${parts[1]}-${parts[0]}`;
+              } else {
+                formattedDob = formData.dob;
+              }
+            }
+            const cleanPhone = phoneVal ? phoneVal.replace(/\D/g, "") : Math.random().toString(36).substring(7);
+            const userEmail = `${cleanPhone}@kalpjoytish.com`;
+            return JSON.stringify({
+              firstname: formData.firstName,
+              middlename: formData.middleName,
+              lastname: formData.lastName,
+              gender: formData.gender,
+              dateofbirth: formattedDob,
+              timeofbirth: formData.tob,
+              placeofbirth: formData.birthPlace,
+              city: formData.city,
+              state: formData.state,
+              country: formData.country,
+              address: formData.address,
+              phone: phoneVal,
+              email: userEmail
+            });
+          })()
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+          updateUserName(fullName);
+          localStorage.setItem("dob", formData.dob || "");
+          
+          if (data.data) {
+            localStorage.setItem("user", JSON.stringify(data.data));
+          }
+          
+          alert("Profile completed successfully!");
+          navigate(location.state?.from || "/home");
+        } else {
+          alert(data.message || `Failed to create profile: ${response.statusText}`);
+        }
+      } catch (err) {
+        console.error("Profile Create Error:", err);
+        alert(`Profile creation failed: ${err.message}`);
+      } finally {
+        setIsUpdating(false);
+      }
     }
   };
 
@@ -593,9 +653,10 @@ export default function EditProfile() {
             {/* Continue button */}
             <button
               onClick={handleContinue}
-              className="w-full mt-6 bg-gradient-to-r from-orange-400 to-[#ff7448] text-white py-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-all cursor-pointer"
+              disabled={isUpdating}
+              className={`w-full mt-6 bg-gradient-to-r from-orange-400 to-[#ff7448] text-white py-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.99] transition-all cursor-pointer ${isUpdating ? "opacity-60 cursor-not-allowed" : ""}`}
             >
-              {step === 8 ? "Complete Profile" : "Continue"}
+              {isUpdating ? "Completing Profile..." : (step === 8 ? "Complete Profile" : "Continue")}
               <ArrowRight size={20} />
             </button>
           </div>

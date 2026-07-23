@@ -4,11 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 
-import { auth } from "../firebase";
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "firebase/auth";
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,34 +34,6 @@ function Login() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const getRecaptchaVerifier = () => {
-    if (window.recaptchaVerifier) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (err) {
-        console.error("Recaptcha clear error:", err);
-      }
-      window.recaptchaVerifier = null;
-    }
-    const container = document.getElementById("recaptcha-container");
-    if (container) {
-      container.innerHTML = "";
-    }
-
-    const appVerifier = new RecaptchaVerifier(
-      auth,
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: (response) => {
-          console.log("reCAPTCHA resolved automatically");
-        },
-      }
-    );
-    window.recaptchaVerifier = appVerifier;
-    return appVerifier;
-  };
-
   const sendOTP = async () => {
     if (phone.length !== 10) {
       alert("Please enter a valid 10 digit mobile number");
@@ -75,42 +42,42 @@ function Login() {
 
     setLoading(true);
 
+    const USE_MOCK_OTP = false; // Set to false when backend API is live
+
+    if (USE_MOCK_OTP) {
+      // Bypassing real network call for send-otp since it returns 404 right now
+      setTimeout(() => {
+        localStorage.setItem("phone", phone);
+        alert("Mock Mode: OTP Sent Successfully! (Use 123456 to login)");
+        setLoading(false);
+        navigate("/otp", { state: { from: location.state?.from } });
+      }, 800);
+      return;
+    }
+
     try {
-      const appVerifier = getRecaptchaVerifier();
       const formattedPhone = "+91" + phone.trim();
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          phone: formattedPhone
+        })
+      });
 
-      const confirmationResult = await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        appVerifier
-      );
+      const data = await response.json();
 
-      window.confirmationResult = confirmationResult;
-      localStorage.setItem("phone", phone);
-
-      alert("OTP Sent Successfully");
-      navigate("/otp", { state: { from: location.state?.from } });
+      if (response.ok && data.success) {
+        localStorage.setItem("phone", formattedPhone);
+        navigate("/otp", { state: { from: location.state?.from } });
+      } else {
+        alert(data.message || `Failed to send OTP: ${response.statusText}`);
+      }
     } catch (error) {
-      console.error("Firebase Error:", error);
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) {}
-        window.recaptchaVerifier = null;
-      }
-
-      let msg = error.message;
-      if (error.code === "auth/invalid-app-credential") {
-        msg = "Firebase Auth domain not authorized or app credentials invalid. Please check Firebase Console.";
-      } else if (error.code === "auth/captcha-check-failed") {
-        msg = "reCAPTCHA check failed. Please try again.";
-      } else if (error.code === "auth/too-many-requests") {
-        msg = "Too many requests / SMS limit reached for this number. Try test numbers or wait a few minutes.";
-      } else if (error.code === "auth/quota-exceeded") {
-        msg = "Firebase Daily Free SMS Quota (10 SMS/day) has been exceeded! Add your number to Test Phone Numbers in Firebase Console.";
-      } else if (error.code === "auth/invalid-phone-number") {
-        msg = "Invalid phone number format.";
-      }
-
-      alert(`Error (${error.code || "UNKNOWN"}):\n${msg}`);
+      console.error("OTP Send Error:", error);
+      alert(`Send Failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
