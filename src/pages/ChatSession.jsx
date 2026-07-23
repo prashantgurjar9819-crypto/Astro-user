@@ -156,18 +156,25 @@ export default function ChatSession() {
     });
 
     // Chat ended event
-    socket.on("chat_ended", (data) => {
+    const handleChatEnded = (data) => {
+      console.log("🔴 Chat Session Ended received:", data);
       setSessionStatus("COMPLETED");
       setSummaryData({
-        totalDurationMinutes: data.totalDurationMinutes || data.duration || elapsedMinutes,
-        totalAmountDeducted: data.totalAmountDeducted || data.amount || (elapsedMinutes * astrologer.priceRaw),
-        astrologerEarnings: data.astrologerEarnings || 0
+        totalDurationMinutes: data?.totalDurationMinutes || data?.duration || elapsedMinutes,
+        totalAmountDeducted: data?.totalAmountDeducted || data?.amount || (elapsedMinutes * astrologer.priceRaw),
+        astrologerEarnings: data?.astrologerEarnings || 0
       });
       setShowSummaryModal(true);
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
-    });
+    };
+
+    socket.on("chat_ended", handleChatEnded);
+    socket.on("session_ended", handleChatEnded);
+    socket.on("chat_session_ended", handleChatEnded);
+    socket.on("end_chat", handleChatEnded);
+    socket.on("end_session", handleChatEnded);
 
     // Fetch initial chat history
     const fetchHistory = async () => {
@@ -212,11 +219,23 @@ export default function ChatSession() {
         const resData = await response.json();
         if (response.ok && resData.success && resData.data) {
           const currentSession = resData.data.find(s => s._id === sessionId || s.id === sessionId);
-          if (currentSession && (currentSession.status === "ACTIVE" || currentSession.status === "COMPLETED")) {
+          if (currentSession && (currentSession.status === "ACTIVE" || currentSession.status === "COMPLETED" || currentSession.status === "ENDED")) {
+            const finalStatus = currentSession.status === "ENDED" ? "COMPLETED" : currentSession.status;
             setSessionStatus((prev) => {
-              if (prev !== currentSession.status) {
-                console.log("Session status dynamically updated to:", currentSession.status);
-                return currentSession.status;
+              if (prev !== finalStatus) {
+                console.log("Session status dynamically updated via poll:", finalStatus);
+                if (finalStatus === "COMPLETED") {
+                  setSummaryData({
+                    totalDurationMinutes: currentSession.duration || currentSession.totalDurationMinutes || elapsedMinutes,
+                    totalAmountDeducted: currentSession.amountDeducted || currentSession.totalAmountDeducted || currentSession.cost || (elapsedMinutes * astrologer.priceRaw),
+                    astrologerEarnings: currentSession.astrologerEarnings || 0
+                  });
+                  setShowSummaryModal(true);
+                  if (socketRef.current) {
+                    socketRef.current.disconnect();
+                  }
+                }
+                return finalStatus;
               }
               return prev;
             });
