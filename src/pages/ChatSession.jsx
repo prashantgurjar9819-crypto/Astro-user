@@ -96,6 +96,12 @@ export default function ChatSession() {
 
     const socket = socketRef.current;
 
+    // Join room immediately if already connected, and also on reconnect
+    if (socket.connected) {
+      console.log("Connected on mount, joining room directly.");
+      socket.emit("join_session", { sessionId });
+    }
+
     socket.on("connect", () => {
       console.log("Connected to Chat Socket:", socket.id);
       socket.emit("join_session", { sessionId });
@@ -103,6 +109,8 @@ export default function ChatSession() {
 
     // Listen for incoming messages
     socket.on("receive_message", (msg) => {
+      // Hide waiting screen instantly if any message is received
+      setSessionStatus("ACTIVE");
       // Avoid duplicate messages
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg._id || m.id === msg.id)) return prev;
@@ -122,8 +130,16 @@ export default function ChatSession() {
       });
     });
 
-    // Listen for active state / tick
+    // Listen for active state / tick / acceptance events
     socket.on("session_active", () => {
+      setSessionStatus("ACTIVE");
+    });
+
+    socket.on("accept_chat_request", () => {
+      setSessionStatus("ACTIVE");
+    });
+
+    socket.on("accept_request", () => {
       setSessionStatus("ACTIVE");
     });
 
