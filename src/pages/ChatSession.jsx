@@ -196,12 +196,44 @@ export default function ChatSession() {
       }
     };
 
+    // Fallback REST polling for status transition
+    const statusPoll = setInterval(async () => {
+      try {
+        const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+        const userId = userObj._id || userObj.id || "";
+        if (!userId) return;
+
+        const token = localStorage.getItem("authToken");
+        const response = await fetch(`https://kalpjoytish-backend.onrender.com/api/chat/sessions?userId=${userId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const resData = await response.json();
+        if (response.ok && resData.success && resData.data) {
+          const currentSession = resData.data.find(s => s._id === sessionId || s.id === sessionId);
+          if (currentSession && (currentSession.status === "ACTIVE" || currentSession.status === "COMPLETED")) {
+            setSessionStatus((prev) => {
+              if (prev !== currentSession.status) {
+                console.log("Session status dynamically updated to:", currentSession.status);
+                return currentSession.status;
+              }
+              return prev;
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Status poll error:", e);
+      }
+    }, 3000);
+
     fetchHistory();
 
     return () => {
       if (socket) {
         socket.disconnect();
       }
+      clearInterval(statusPoll);
     };
   }, [sessionId, isLoggedIn]);
 
@@ -447,7 +479,7 @@ export default function ChatSession() {
 
         {/* Waiting / Connecting Screen Overlay */}
         {sessionStatus === "PENDING" && !showDobModal && (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white/90 z-20 text-center animate-fade-in">
+          <div className="absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
             <div className="w-20 h-20 bg-orange-50 rounded-full border-4 border-orange-100/50 flex items-center justify-center shadow-inner mb-6 relative">
               <Clock size={36} className="text-[#FF6F3D] animate-spin-slow" />
             </div>
