@@ -6,35 +6,43 @@ import { useAuth } from "../context/AuthContext";
 
 const astrologers = [
   {
+    id: "65b839cd49b29e00192e01a4",
     name: "Vikram",
     skill: "Kundli, Vastu, Marriage",
     exp: "8 Years",
     rating: "4.9",
     price: "₹15/min",
+    priceRaw: 15,
     image: "https://i.pravatar.cc/200?img=33",
   },
   {
+    id: "65b839cd49b29e00192e01a5",
     name: "Sumit",
     skill: "Love, Career, Marriage",
     exp: "5 Years",
     rating: "4.9",
     price: "₹20/min",
+    priceRaw: 20,
     image: "https://i.pravatar.cc/200?img=12",
   },
   {
+    id: "65b839cd49b29e00192e01a6",
     name: "Rahul",
     skill: "Vedic Astrology, Financial",
     exp: "3 Years",
     rating: "4.8",
     price: "₹18/min",
+    priceRaw: 18,
     image: "https://i.pravatar.cc/200?img=68",
   },
   {
+    id: "65b839cd49b29e00192e01a7",
     name: "Neha",
     skill: "Numerology, Love, Career",
     exp: "6 Years",
     rating: "5.0",
     price: "₹25/min",
+    priceRaw: 25,
     image: "https://i.pravatar.cc/200?img=47",
   },
 ];
@@ -42,6 +50,7 @@ const astrologers = [
 export default function Chat() {
   const navigate = useNavigate();
   const { isLoggedIn, triggerLoginModal } = useAuth();
+  const [loadingAstro, setLoadingAstro] = useState(null);
 
   const [followedAstro, setFollowedAstro] = useState(() => {
     try {
@@ -60,6 +69,54 @@ export default function Chat() {
     }
     setFollowedAstro(updated);
     localStorage.setItem("followedAstrologers", JSON.stringify(updated));
+  };
+
+  const handleStartChat = async (item) => {
+    if (!isLoggedIn) {
+      triggerLoginModal("Chat", `/chat`);
+      return;
+    }
+
+    setLoadingAstro(item.id);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/chat/initiate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          astrologerId: item.id,
+          perMinuteRate: item.priceRaw
+        })
+      });
+
+      const resData = await response.json();
+
+      if (response.ok && resData.success) {
+        // Navigate to the chat session screen, passing the created sessionId
+        navigate(`/chat-session/${item.name}`, { 
+          state: { 
+            astrologer: item,
+            sessionId: resData.data._id || resData.data.sessionId
+          } 
+        });
+      } else {
+        // Check if balance error or other
+        if (resData.message && (resData.message.toLowerCase().includes("balance") || resData.message.toLowerCase().includes("wallet") || resData.message.toLowerCase().includes("insufficient"))) {
+          alert(resData.message || "Insufficient wallet balance. Please recharge your wallet to start a chat.");
+          navigate("/wallet");
+        } else {
+          alert(resData.message || "Failed to start chat session.");
+        }
+      }
+    } catch (error) {
+      console.error("Start Chat Error:", error);
+      alert(`Error starting chat: ${error.message}`);
+    } finally {
+      setLoadingAstro(null);
+    }
   };
 
   return (
@@ -105,13 +162,7 @@ export default function Chat() {
             {astrologers.map((item, index) => (
               <div
                 key={index}
-                onClick={() => {
-                  if (!isLoggedIn) {
-                    triggerLoginModal("Chat", `/chat-session/${item.name}`);
-                  } else {
-                    navigate(`/chat-session/${item.name}`, { state: { astrologer: item } });
-                  }
-                }}
+                onClick={() => handleStartChat(item)}
                 className="bg-white rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.04)] border border-gray-100 p-4.5 cursor-pointer hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-between gap-3"
               >
                 {/* Left Details */}
@@ -173,18 +224,15 @@ export default function Chat() {
 
                 {/* Chat Button */}
                 <button
+                  disabled={loadingAstro === item.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isLoggedIn) {
-                      triggerLoginModal("Chat", `/chat-session/${item.name}`);
-                    } else {
-                      navigate(`/chat-session/${item.name}`, { state: { astrologer: item } });
-                    }
+                    handleStartChat(item);
                   }}
-                  className="w-[96px] py-2.5 rounded-full bg-[#FFF2EC] text-[#FF6F3D] hover:bg-[#ffe5d9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm shadow-orange-500/5"
+                  className="w-[96px] py-2.5 rounded-full bg-[#FFF2EC] text-[#FF6F3D] hover:bg-[#ffe5d9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm shadow-orange-500/5 disabled:opacity-60"
                 >
                   <MessageCircle size={13} className="fill-current" />
-                  Chat
+                  {loadingAstro === item.id ? "..." : "Chat"}
                 </button>
               </div>
             ))}
