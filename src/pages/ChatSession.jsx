@@ -40,6 +40,8 @@ export default function ChatSession() {
   };
 
   const sessionId = location.state?.sessionId;
+  const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = userObj._id || userObj.id || "";
 
   const [messages, setMessages] = useState([]);
   const [showDobModal, setShowDobModal] = useState(true);
@@ -56,6 +58,9 @@ export default function ChatSession() {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryData, setSummaryData] = useState(null);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [review, setReview] = useState("");
+  const [submittingRate, setSubmittingRate] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -192,6 +197,8 @@ export default function ChatSession() {
     if (socketRef.current) {
       socketRef.current.emit("send_message", {
         sessionId: sessionId,
+        senderId: userId,
+        senderType: "USER",
         text: `🎂 My Date of Birth is ${formattedDob}`,
         messageType: "text"
       });
@@ -205,6 +212,8 @@ export default function ChatSession() {
     if (socketRef.current) {
       socketRef.current.emit("send_message", {
         sessionId: sessionId,
+        senderId: userId,
+        senderType: "USER",
         text: inputMessage,
         messageType: "text"
       });
@@ -262,6 +271,8 @@ export default function ChatSession() {
         if (socketRef.current) {
           socketRef.current.emit("send_message", {
             sessionId: sessionId,
+            senderId: userId,
+            senderType: "USER",
             text: "",
             mediaUrl: imageUrl,
             messageType: "image"
@@ -320,6 +331,38 @@ export default function ChatSession() {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
+    }
+  };
+
+  const handleRateSession = async () => {
+    setSubmittingRate(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/chat/rate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          rating: rating,
+          review: review
+        })
+      });
+
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        alert("Thank you for your rating!");
+      } else {
+        alert(resData.message || "Failed to submit rating.");
+      }
+    } catch (err) {
+      console.error("Rating Error:", err);
+    } finally {
+      setSubmittingRate(false);
+      setShowSummaryModal(false);
+      navigate("/chat");
     }
   };
 
@@ -634,14 +677,56 @@ export default function ChatSession() {
                 </div>
               </div>
 
+              {/* Rating Section */}
+              <div className="w-full mt-4 flex flex-col items-center">
+                <span className="text-xs font-bold text-gray-600 mb-2">Rate your consultation</span>
+                <div className="flex gap-1.5 justify-center">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="cursor-pointer transform hover:scale-110 active:scale-95 transition-transform"
+                    >
+                      <svg
+                        className={`w-7 h-7 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 17.75l-6.172 3.245 1.179-6.873-4.993-4.867 6.9-1.002L12 2l3.086 6.253 6.9 1.002-4.993 4.867 1.179 6.873z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Review Text Area */}
+                <textarea
+                  placeholder="Write a brief review... (optional)"
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  className="w-full mt-3.5 p-3 border border-gray-200 rounded-xl text-xs outline-none focus:border-orange-400 resize-none h-16 bg-gray-50/50"
+                ></textarea>
+              </div>
+
               <button
+                onClick={handleRateSession}
+                disabled={submittingRate}
+                className="w-full mt-5 py-3 bg-[#FF6F3D] hover:bg-[#e05e30] rounded-xl font-bold text-white text-sm shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {submittingRate ? "Submitting..." : "Submit Review & Exit"}
+              </button>
+
+              <button
+                type="button"
                 onClick={() => {
                   setShowSummaryModal(false);
                   navigate("/chat");
                 }}
-                className="w-full mt-6 py-3 bg-[#FF6F3D] hover:bg-[#e05e30] rounded-xl font-bold text-white text-sm shadow-md active:scale-95 transition-all cursor-pointer"
+                className="mt-3 text-xs font-bold text-gray-400 hover:text-gray-600 cursor-pointer"
               >
-                Go Back to Chat
+                Skip Rating
               </button>
             </div>
           </div>

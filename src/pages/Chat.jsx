@@ -80,6 +80,9 @@ export default function Chat() {
     setLoadingAstro(item.id);
     try {
       const token = localStorage.getItem("authToken");
+      const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = userObj._id || userObj.id || "";
+
       const response = await fetch("https://kalpjoytish-backend.onrender.com/api/chat/initiate", {
         method: "POST",
         headers: {
@@ -87,8 +90,8 @@ export default function Chat() {
           ...(token ? { "Authorization": `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          astrologerId: item.id,
-          perMinuteRate: item.priceRaw
+          userId: userId,
+          astrologerId: item.id
         })
       });
 
