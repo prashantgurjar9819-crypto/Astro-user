@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, Search, Mic, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Bottomnav from "../component/Bottomnav";
 import { useAuth } from "../context/AuthContext";
 
-const astrologers = [
+const mockAstrologers = [
   {
     id: "65b839cd49b29e00192e01a4",
     name: "Vikram",
@@ -51,6 +51,8 @@ export default function Chat() {
   const navigate = useNavigate();
   const { isLoggedIn, triggerLoginModal } = useAuth();
   const [loadingAstro, setLoadingAstro] = useState(null);
+  const [astrologers, setAstrologers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [followedAstro, setFollowedAstro] = useState(() => {
     try {
@@ -59,6 +61,36 @@ export default function Chat() {
       return [];
     }
   });
+
+  useEffect(() => {
+    const fetchOnlineAstrologers = async () => {
+      try {
+        const response = await fetch("https://kalpjoytish-backend.onrender.com/api/astro/all?online=true");
+        const resData = await response.json();
+        if (response.ok && resData.success && resData.data && resData.data.length > 0) {
+          const formatted = resData.data.map(astro => ({
+            id: astro._id,
+            name: astro.name || "Astrologer",
+            skill: (astro.specialization && astro.specialization.join(", ")) || "Kundli, Vastu, Marriage",
+            exp: astro.experience || "5 Years",
+            rating: astro.rating || "4.8",
+            price: astro.consultationFee ? `₹${astro.consultationFee}/min` : "₹15/min",
+            priceRaw: astro.consultationFee || 15,
+            image: astro.profileImage || `https://i.pravatar.cc/200?img=${Math.floor(Math.random() * 70) + 1}`,
+          }));
+          setAstrologers(formatted);
+        } else {
+          setAstrologers(mockAstrologers);
+        }
+      } catch (error) {
+        console.error("Fetch astrologers error:", error);
+        setAstrologers(mockAstrologers);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOnlineAstrologers();
+  }, []);
 
   const toggleFollow = (name) => {
     let updated;
@@ -162,83 +194,94 @@ export default function Chat() {
 
           {/* Cards */}
           <div className="space-y-4 px-5 mt-6">
-            {astrologers.map((item, index) => (
-              <div
-                key={index}
-                onClick={() => handleStartChat(item)}
-                className="bg-white rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.04)] border border-gray-100 p-4.5 cursor-pointer hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-between gap-3"
-              >
-                {/* Left Details */}
-                <div className="flex gap-3.5 flex-1 min-w-0">
-                  {/* Image with Online Status */}
-                  <div className="relative flex-shrink-0">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden border border-orange-100 shadow-inner">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h2 className="font-bold text-[#1d2340] text-base leading-tight truncate">
-                        {item.name}
-                      </h2>
-                      <span className="bg-[#FFF2EC] text-[#FF6F3D] text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                        Online
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFollow(item.name);
-                        }}
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-all uppercase tracking-wider cursor-pointer active:scale-95 ${
-                          followedAstro.includes(item.name)
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                        }`}
-                      >
-                        {followedAstro.includes(item.name) ? "Following" : "+ Follow"}
-                      </button>
-                    </div>
-
-                    <p className="text-xs text-gray-500 mt-1 truncate">
-                      {item.skill}
-                    </p>
-
-                    <p className="text-[10px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">
-                      Exp: {item.exp}
-                    </p>
-
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className="text-xs font-bold text-orange-500">
-                        {item.price}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        ★ {item.rating}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Chat Button */}
-                <button
-                  disabled={loadingAstro === item.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleStartChat(item);
-                  }}
-                  className="w-[96px] py-2.5 rounded-full bg-[#FFF2EC] text-[#FF6F3D] hover:bg-[#ffe5d9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm shadow-orange-500/5 disabled:opacity-60"
-                >
-                  <MessageCircle size={13} className="fill-current" />
-                  {loadingAstro === item.id ? "..." : "Chat"}
-                </button>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <span className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></span>
+                <span className="text-sm text-gray-500 font-medium">Finding online astrologers...</span>
               </div>
-            ))}
+            ) : astrologers.length === 0 ? (
+              <div className="text-center py-20 text-gray-500 text-sm">
+                No active online astrologers found.
+              </div>
+            ) : (
+              astrologers.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleStartChat(item)}
+                  className="bg-white rounded-3xl shadow-[0_8px_24px_rgba(0,0,0,0.04)] border border-gray-100 p-4.5 cursor-pointer hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-between gap-3"
+                >
+                  {/* Left Details */}
+                  <div className="flex gap-3.5 flex-1 min-w-0">
+                    {/* Image with Online Status */}
+                    <div className="relative flex-shrink-0">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-orange-100 shadow-inner">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h2 className="font-bold text-[#1d2340] text-base leading-tight truncate">
+                          {item.name}
+                        </h2>
+                        <span className="bg-[#FFF2EC] text-[#FF6F3D] text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                          Online
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFollow(item.name);
+                          }}
+                          className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-all uppercase tracking-wider cursor-pointer active:scale-95 ${
+                            followedAstro.includes(item.name)
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          }`}
+                        >
+                          {followedAstro.includes(item.name) ? "Following" : "+ Follow"}
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {item.skill}
+                      </p>
+
+                      <p className="text-[10px] font-bold text-gray-400 mt-0.5 uppercase tracking-wider">
+                        Exp: {item.exp}
+                      </p>
+
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="text-xs font-bold text-orange-500">
+                          {item.price}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          ★ {item.rating}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Button */}
+                  <button
+                    disabled={loadingAstro === item.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartChat(item);
+                    }}
+                    className="w-[96px] py-2.5 rounded-full bg-[#FFF2EC] text-[#FF6F3D] hover:bg-[#ffe5d9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm shadow-orange-500/5 disabled:opacity-60"
+                  >
+                    <MessageCircle size={13} className="fill-current" />
+                    {loadingAstro === item.id ? "..." : "Chat"}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
 
         </div>
