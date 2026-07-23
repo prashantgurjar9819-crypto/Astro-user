@@ -152,22 +152,17 @@ export default function ChatSession() {
     // Wallet warning (1 minute remaining)
     socket.on("wallet_warning", (msg) => {
       setShowWarning(true);
-      setTimeout(() => setShowWarning(false), 8000); // Auto-hide warning after 8 seconds
+      setTimeout(() => setShowWarning(false), 8000);
     });
 
     // Chat ended event
     const handleChatEnded = (data) => {
       console.log("🔴 Chat Session Ended received:", data);
-      setSessionStatus("COMPLETED");
-      setSummaryData({
-        totalDurationMinutes: data?.totalDurationMinutes || data?.duration || elapsedMinutes,
-        totalAmountDeducted: data?.totalAmountDeducted || data?.amount || (elapsedMinutes * astrologer.priceRaw),
-        astrologerEarnings: data?.astrologerEarnings || 0
-      });
-      setShowSummaryModal(true);
+      alert("This chat session has been completed by the astrologer.");
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
+      navigate("/chat");
     };
 
     socket.on("chat_ended", handleChatEnded);
@@ -225,15 +220,11 @@ export default function ChatSession() {
               if (prev !== finalStatus) {
                 console.log("Session status dynamically updated via poll:", finalStatus);
                 if (finalStatus === "COMPLETED") {
-                  setSummaryData({
-                    totalDurationMinutes: currentSession.duration || currentSession.totalDurationMinutes || elapsedMinutes,
-                    totalAmountDeducted: currentSession.amountDeducted || currentSession.totalAmountDeducted || currentSession.cost || (elapsedMinutes * astrologer.priceRaw),
-                    astrologerEarnings: currentSession.astrologerEarnings || 0
-                  });
-                  setShowSummaryModal(true);
+                  alert("This chat session has been completed by the astrologer.");
                   if (socketRef.current) {
                     socketRef.current.disconnect();
                   }
+                  navigate("/chat");
                 }
                 return finalStatus;
               }
