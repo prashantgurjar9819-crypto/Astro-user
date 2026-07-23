@@ -1,8 +1,9 @@
+import React, { useState, useEffect } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import HistoryCard from "../component/HistoryCard";
 
-const history = [
+const mockHistory = [
   {
     id: 1,
     name: "Astro Raj",
@@ -40,6 +41,62 @@ const history = [
 
 export default function AstroHistory() {
   const navigate = useNavigate();
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getUserId = () => {
+    try {
+      const userObj = JSON.parse(localStorage.getItem("user") || "{}");
+      return userObj._id || userObj.id || "";
+    } catch {
+      return "";
+    }
+  };
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const userId = getUserId();
+      if (!userId) {
+        setHistory(mockHistory);
+        setLoading(false);
+        return;
+      }
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await fetch(`https://kalpjoytish-backend.onrender.com/api/chat/sessions?userId=${userId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        const resData = await response.json();
+        if (response.ok && resData.success && resData.data && resData.data.length > 0) {
+          // Format sessions to match HistoryCard expected schema
+          const formatted = resData.data.map(session => ({
+            id: session._id,
+            name: session.astrologerId?.name || "Astrologer",
+            type: "Chat Session",
+            mode: "chat",
+            date: new Date(session.startTime || session.createdAt).toLocaleDateString([], {
+              day: 'numeric', month: 'short', year: 'numeric'
+            }),
+            duration: `${session.totalDurationMinutes || 0} min`,
+            price: `₹${session.perMinuteRate || 0} / min`,
+            total: `₹${session.totalAmountDeducted || 0}`,
+            status: session.status === 'COMPLETED' ? 'Completed' : session.status
+          }));
+          setHistory(formatted);
+        } else {
+          setHistory(mockHistory);
+        }
+      } catch (err) {
+        console.error("Fetch history error:", err);
+        setHistory(mockHistory);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F7F7F7] flex justify-center">
@@ -66,9 +123,15 @@ export default function AstroHistory() {
 
         {/* Cards */}
         <div className="p-4 space-y-4">
-          {history.map((item) => (
-            <HistoryCard key={item.id} item={item} />
-          ))}
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <span className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></span>
+            </div>
+          ) : (
+            history.map((item) => (
+              <HistoryCard key={item.id} item={item} />
+            ))
+          )}
         </div>
 
       </div>
