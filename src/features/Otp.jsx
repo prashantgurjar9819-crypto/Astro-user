@@ -7,10 +7,11 @@ import { useAuth } from "../context/AuthContext";
 function Otp() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginUser } = useAuth();
+  const { loginUser, updateUserName } = useAuth();
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(30);
+  const [loading, setLoading] = useState(false);
 
   const inputRefs = useRef([]);
 
@@ -25,6 +26,23 @@ function Otp() {
   }, [timer]);
 
   const handleChange = (value, index) => {
+    // If value has multiple characters (e.g. mobile autofill or paste)
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
+      if (digits.length > 0) {
+        const newOtp = [...otp];
+        digits.forEach((d, i) => {
+          if (index + i < 6) {
+            newOtp[index + i] = d;
+          }
+        });
+        setOtp(newOtp);
+        const nextIdx = Math.min(index + digits.length, 5);
+        inputRefs.current[nextIdx]?.focus();
+      }
+      return;
+    }
+
     if (!/^\d?$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -42,32 +60,250 @@ function Otp() {
     }
   };
 
-  const handleVerify = () => {
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pastedData) {
+      const newOtp = ["", "", "", "", "", ""];
+      pastedData.split("").forEach((char, i) => {
+        newOtp[i] = char;
+      });
+      setOtp(newOtp);
+      const nextIdx = Math.min(pastedData.length, 5);
+      inputRefs.current[nextIdx]?.focus();
+    }
+  };
+
+  const base64url = (source) => {
+    const jsonStr = JSON.stringify(source);
+    const bytes = new TextEncoder().encode(jsonStr);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    let encoded = btoa(binary);
+    encoded = encoded.replace(/=+$/, '');
+    encoded = encoded.replace(/\+/g, '-');
+    encoded = encoded.replace(/\//g, '_');
+    return encoded;
+  };
+
+  const handleVerify = async () => {
     const enteredOtp = otp.join("");
 
     if (enteredOtp.length !== 6) {
-      alert("Please enter 6 digit OTP");
+      alert("Please enter a 6-digit OTP");
       return;
     }
 
-    // API call yaha hogi
-    loginUser();
+    setLoading(true);
 
-    navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
+    const USE_MOCK_OTP = false; // Set to false when backend API is live
+
+    try {
+      const phoneNum = localStorage.getItem("phone");
+      if (!phoneNum) {
+        alert("Phone number not found in session. Please start again.");
+        navigate("/");
+        return;
+      }
+
+      if (USE_MOCK_OTP) {
+        if (enteredOtp !== "123456") {
+          alert("Invalid Mock OTP! Please enter 123456.");
+          setLoading(false);
+          return;
+        }
+
+        // Generate a local JWT for the backend login API (tuloToken)
+        const header = base64url({ alg: "HS256", typ: "JWT" });
+        const payload = base64url({ sub: phoneNum, name: "Astro Client User" });
+        const signature = "dummy_signature";
+        const jwt = `${header}.${payload}.${signature}`;
+
+        // In Mock mode, directly perform the login step via /api/auth/login (which is live!)
+        const loginResponse = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: phoneNum,
+            mobile: phoneNum,
+            tuloToken: jwt
+          }),
+        });
+
+        if (loginResponse.ok) {
+          const loginData = await loginResponse.json();
+          if (loginData.success) {
+            if (loginData.data) {
+              if (loginData.data.token) {
+                localStorage.setItem("authToken", loginData.data.token);
+              }
+              if (loginData.data.user) {
+                localStorage.setItem("user", JSON.stringify(loginData.data.user));
+                if (loginData.data.user.name) {
+                  updateUserName(loginData.data.user.name);
+                }
+              }
+            }
+            loginUser();
+            navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
+          } else {
+            alert(loginData.message || "Backend login failed.");
+          }
+        } else {
+          const errData = await loginResponse.json().catch(() => ({}));
+          alert(errData.message || `Backend login failed with status: ${loginResponse.status}`);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Call backend verify OTP API (Live Mode)
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phoneNum,
+          otp: enteredOtp
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // If verify-otp returns the token and user directly
+        if (data.data && data.data.token) {
+          localStorage.setItem("authToken", data.data.token);
+          if (data.data.user) {
+            localStorage.setItem("user", JSON.stringify(data.data.user));
+            if (data.data.user.name) {
+              updateUserName(data.data.user.name);
+            }
+          }
+        } else {
+          // Fallback: If it only verified, call login API next, ignoring database constraint errors in frontend
+          try {
+            const header = base64url({ alg: "HS256", typ: "JWT" });
+            const payload = base64url({ sub: phoneNum, name: "Astro Client User" });
+            const signature = "dummy_signature";
+            const jwt = `${header}.${payload}.${signature}`;
+
+            const loginResponse = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                phone: phoneNum,
+                mobile: phoneNum,
+                tuloToken: jwt
+              }),
+            });
+
+            if (loginResponse.ok) {
+              const loginData = await loginResponse.json();
+              if (loginData.success && loginData.data) {
+                if (loginData.data.token) {
+                  localStorage.setItem("authToken", loginData.data.token);
+                }
+                if (loginData.data.user) {
+                  localStorage.setItem("user", JSON.stringify(loginData.data.user));
+                  if (loginData.data.user.name) {
+                    updateUserName(loginData.data.user.name);
+                  }
+                }
+              }
+            }
+          } catch (loginErr) {
+            console.warn("Background Login API error (bypassing for onboarding):", loginErr);
+          }
+        }
+
+        // Check if user already has a complete profile in database
+        const savedUserStr = localStorage.getItem("user");
+        let hasProfile = false;
+        if (savedUserStr) {
+          try {
+            const userObj = JSON.parse(savedUserStr);
+            // Profile is completed if isProfileCompleted is true, or if we have firstname, or name is not default placeholder
+            if (
+              userObj.isProfileCompleted || 
+              userObj.firstname || 
+              (userObj.name && userObj.name !== "Ravi Sharma" && userObj.name !== "Astro Client User")
+            ) {
+              hasProfile = true;
+            }
+          } catch (e) {
+            console.error("Error parsing user object:", e);
+          }
+        }
+
+        // ALWAYS log in the user on front-end
+        loginUser();
+
+        // Redirect based on profile status
+        if (hasProfile) {
+          navigate("/home", { replace: true });
+        } else {
+          navigate("/editprofile?mode=onboarding", { state: { from: location.state?.from } });
+        }
+      } else {
+        alert(data.message || "Invalid OTP. Please check and try again.");
+      }
+    } catch (error) {
+      console.error("OTP Verification Error:", error);
+      alert(`Verification Failed: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleResend = () => {
-    setTimer(30);
+  const handleResend = async () => {
+    const phone = localStorage.getItem("phone");
+    if (!phone) {
+      alert("Phone number not found. Redirecting to login.");
+      navigate("/");
+      return;
+    }
 
-    // Resend OTP API yaha call kar sakte ho
-    alert("OTP Resent Successfully");
+    setLoading(true);
+    try {
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          phone: phone.trim()
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setTimer(30);
+        alert(data.message || "OTP Resent Successfully!");
+      } else {
+        alert(data.message || `Failed to resend OTP: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
+      alert(`Failed to resend OTP: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="h-screen bg-[#ff8253] flex flex-col justify-end overflow-hidden">
       <div className="bg-white rounded-t-[35px] h-[85vh] px-6 py-8 overflow-y-auto">
-        
-        {/* Back Button */}
+
+        {/* Back */}
         <button onClick={() => navigate(-1)}>
           <ArrowLeft size={24} />
         </button>
@@ -87,20 +323,25 @@ function Otp() {
         </h1>
 
         <p className="text-center text-gray-500 mt-2">
-          Enter the 6-digit OTP sent to
+          Enter the OTP sent to
         </p>
 
         <p className="text-center font-semibold text-[#ff7448] mt-1">
-          +91 9876543210
+          {(() => {
+            const rawPhone = localStorage.getItem("phone") || "XXXXXXXXXX";
+            return rawPhone.startsWith("+91") ? rawPhone : "+91 " + rawPhone;
+          })()}
         </p>
 
         {/* OTP Boxes */}
-        <div className="flex justify-center gap-3 mt-10">
+        <div className="flex justify-center gap-3 mt-10" onPaste={handlePaste}>
           {otp.map((digit, index) => (
             <input
               key={index}
               ref={(el) => (inputRefs.current[index] = el)}
               type="text"
+              inputMode="numeric"
+              maxLength={6}
               value={digit}
               onChange={(e) =>
                 handleChange(e.target.value, index)
@@ -108,28 +349,30 @@ function Otp() {
               onKeyDown={(e) =>
                 handleKeyDown(e, index)
               }
-              maxLength={1}
               className="w-12 h-14 border-2 border-gray-300 rounded-xl text-center text-2xl font-bold focus:outline-none focus:border-[#ff7448]"
             />
           ))}
         </div>
 
-        {/* Verify Button */}
+        {/* Verify */}
         <button
           onClick={handleVerify}
-          className="w-full mt-10 bg-[#ff7448] text-white py-4 rounded-xl text-lg font-semibold hover:bg-[#ff6230] transition"
+          disabled={loading}
+          className={`w-full mt-10 bg-[#ff7448] text-[#ffffff] py-4 rounded-xl text-lg font-semibold transition-opacity ${
+            loading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#ff6230]"
+          }`}
         >
-          Verify OTP
+          {loading ? "Verifying..." : "Verify OTP"}
         </button>
 
-        {/* Resend OTP */}
+        {/* Timer */}
         <div className="text-center mt-6">
           <p className="text-gray-500">
             Didn't receive OTP?
           </p>
 
           {timer > 0 ? (
-            <p className="text-gray-600 mt-2">
+            <p className="mt-2">
               Resend in{" "}
               <span className="font-semibold text-[#ff7448]">
                 {timer}s
@@ -138,12 +381,17 @@ function Otp() {
           ) : (
             <button
               onClick={handleResend}
-              className="text-[#ff7448] font-semibold mt-2"
+              disabled={loading}
+              className="text-[#ff7448] font-semibold mt-2 disabled:opacity-50"
             >
               Resend OTP
             </button>
           )}
         </div>
+
+        {/* Invisible reCAPTCHA container for Resend */}
+        <div id="recaptcha-container-otp"></div>
+
       </div>
     </div>
   );

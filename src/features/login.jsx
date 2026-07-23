@@ -31,6 +31,58 @@ function Login() {
     navigate("/otp", { state: { from: location.state?.from } });
   };
 
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const sendOTP = async () => {
+    if (phone.length !== 10) {
+      alert("Please enter a valid 10 digit mobile number");
+      return;
+    }
+
+    setLoading(true);
+
+    const USE_MOCK_OTP = false; // Set to false when backend API is live
+
+    if (USE_MOCK_OTP) {
+      // Bypassing real network call for send-otp since it returns 404 right now
+      setTimeout(() => {
+        localStorage.setItem("phone", phone);
+        alert("Mock Mode: OTP Sent Successfully! (Use 123456 to login)");
+        setLoading(false);
+        navigate("/otp", { state: { from: location.state?.from } });
+      }, 800);
+      return;
+    }
+
+    try {
+      const formattedPhone = "+91" + phone.trim();
+      const response = await fetch("https://kalpjoytish-backend.onrender.com/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          phone: formattedPhone
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem("phone", formattedPhone);
+        navigate("/otp", { state: { from: location.state?.from } });
+      } else {
+        alert(data.message || `Failed to send OTP: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("OTP Send Error:", error);
+      alert(`Send Failed: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-[#ff8253] flex flex-col justify-end overflow-hidden">
       {/* White Card */}
@@ -53,11 +105,11 @@ function Login() {
         </div>
 
         {/* Heading */}
-        <h1 className="text-3xl md:text-4xl font-bold text-center mt-6">
+        <h1 className="text-3xl font-bold text-center mt-6">
           Welcome Back 👋
         </h1>
 
-        <p className="text-center text-gray-500 mt-2 text-sm md:text-base">
+        <p className="text-center text-gray-500 mt-2">
           Login to continue your astrology journey
         </p>
 
@@ -67,10 +119,12 @@ function Login() {
             <Phone size={20} className="text-gray-600" />
 
             <input
-              type="text"
-              value={mobile}
-              onChange={handleMobileChange}
+              type="tel"
               placeholder="Enter Mobile Number"
+              value={phone}
+              onChange={(e) =>
+                setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+              }
               className="ml-3 w-full bg-transparent outline-none text-base"
             />
           </div>
@@ -79,19 +133,26 @@ function Login() {
         {/* Continue Button */}
         <div className="flex justify-center">
           <button
-            onClick={handleContinue}
-            className="w-full max-w-md mt-5 bg-[#ff7448] text-white py-4 rounded-xl text-lg font-semibold hover:bg-[#ff6230] transition cursor-pointer"
+            onClick={sendOTP}
+            disabled={loading}
+            className={`w-full max-w-md mt-5 bg-[#ff7448] text-white py-4 rounded-xl text-lg font-semibold transition-opacity ${
+              loading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#ff6230]"
+            }`}
           >
-            Continue
+            {loading ? "Sending OTP..." : "Continue"}
           </button>
         </div>
 
         {/* Google Button */}
         <div className="flex justify-center">
-          <button className="w-full max-w-md mt-5 border border-gray-300 py-4 rounded-xl flex justify-center items-center gap-2 text-[#5f82f5]">
+          <button className="w-full max-w-md mt-5 border border-gray-300 py-4 rounded-xl text-[#5f82f5]">
             Continue with Google
           </button>
         </div>
+
+        {/* reCAPTCHA Checkbox Container */}
+        <div id="recaptcha-container" className="flex justify-center mt-4"></div>
+
       </div>
     </div>
   );

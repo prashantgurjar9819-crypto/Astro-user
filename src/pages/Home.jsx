@@ -51,7 +51,8 @@ const planets = [
   {
     title: "♄ Saturn (Shani)",
     description: "Represents karma, discipline and hard work.",
-    image: "https://www.indiaparenting.com/images/328/planet-saturn.jpg",
+    image:
+      "https://www.indiaparenting.com/images/328/planet-saturn.jpg",
     bgColor: "bg-gray-300",
   },
   {
@@ -72,11 +73,11 @@ const planets = [
 
 function Home() {
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="w-full max-w-[430px] min-h-screen bg-[#FAFAFA] relative shadow-xl">
+    <div className="min-h-screen bg-[#F6E9E3] flex justify-center">
+      <div className="w-full max-w-[430px] bg-[#FDE8E4] min-h-screen relative shadow-xl">
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto pb-28">
+        <div className="pb-28 overflow-y-auto">
 
           <Header />
 
